@@ -2150,17 +2150,6 @@ function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confM
   const ethNeutral = ethRelative?.state === 'NEUTRU';
   const isNoTradeZone = emaFlat && rsiNeutral && ethNeutral;
 
-  // ── MODIFICARE 2: Crash Exhaustion Detector ─────────────────────
-  // Capitulare post-crash = drop >15% în 5 zile + RSI 4H extrem (<20)
-  // F&G < 15 SAU F&G = 50 (50 = default API când datele istorice lipsesc)
-  // Când activ: downgrade SEMNAL BEAR ACTIV la "EPUIZARE — bounce posibil"
-  const fgExtremeOrMissing = d.fg < 15 || d.fg === 50;
-  const rsi4hVal = rsiB4h?.rsi ?? 50;
-  const crashExhaustion = contextBear
-    && (ema200BTC?.dist ?? 0) < -10   // sub EMA200 semnificativ
-    && rsi4hVal < 20                   // RSI 4H extrem supravândut
-    && fgExtremeOrMissing;             // Fear extrem sau date lipsă
-
   if(isNoTradeZone) {
     banner.style.display = 'block';
     banner.style.background = 'rgba(74,96,128,.06)';
@@ -2181,6 +2170,16 @@ function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confM
   const extCluster   = confMacro?._clusters?.find(cl => cl.name.includes('Extension'));
   const contextBear  = ichiCluster?.dir === 'bear' || ichiCluster?.dir === 'partial_bear';
   const contextBull  = ichiCluster?.dir === 'bull';
+
+  // ── MODIFICARE 2: Crash Exhaustion Detector ─────────────────────
+  // Capitulare post-crash = sub EMA200 semnificativ + RSI 4H extrem (<20)
+  // F&G < 15 SAU F&G = 50 (50 = default API când datele istorice lipsesc)
+  const fgExtremeOrMissing = d.fg < 15 || d.fg === 50;
+  const rsi4hVal = rsiB4h?.rsi ?? 50;
+  const crashExhaustion = contextBear
+    && (ema200BTC?.dist ?? 0) < -10
+    && rsi4hVal < 20
+    && fgExtremeOrMissing;
   const contextClear = contextBear || contextBull; // context neclar → nu generăm alertă direcțională
 
   // ─────────────────────────────────────────────────────
