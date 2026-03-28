@@ -2181,6 +2181,26 @@ function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confM
     && (ema200BTC?.dist ?? 0) < -10
     && rsi4hVal < 25
     && fgExtremeOrMissing;
+  // ── RE-ENTRY BOUNCE ────────────────────────────────────────────────
+  // Semnal tactic în bear market — re-intrare parțială 10-20% după bounce
+  const ema200DistVal = ema200BTC?.dist ?? 0;
+  const btcPriceNow   = d.btcPrice ?? 0;
+  // Drawdown față de high-ul din ultimele 30 de zile (proxy: EMA200 dist + extra)
+  // Aproximăm cu EMA200 dist < -15% ca indicator de drawdown semnificativ
+  const drawdownSignificant = ema200DistVal < -15;
+  const rsiD1d      = rsiB1d?.rsi ?? 50;
+  const rsiD1dPrev  = rsiB1d?.prev ?? rsiD1d;
+  const rsiRiseStrong       = (rsiD1d - rsiD1dPrev) > 2;
+  const rsiComingFromOversold = rsiD1dPrev < 40;
+
+  const reentryBounce = contextBear
+    && rsiD1d < 45
+    && rsiRiseStrong              // RSI crește cu cel puțin 2 puncte
+    && rsiComingFromOversold      // venea din zona oversold
+    && drawdownSignificant        // sub -15% față de EMA200 (proxy drawdown)
+    && eth_state !== 'WEAKNESS'   // ETH nu mai subperformează
+    && !crashExhaustion;          // semnal distinct de EPUIZARE
+
   const contextClear = contextBear || contextBull; // context neclar → nu generăm alertă direcțională
 
   // ─────────────────────────────────────────────────────
