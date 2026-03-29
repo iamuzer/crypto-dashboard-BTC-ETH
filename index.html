@@ -2541,6 +2541,15 @@ function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confM
       +'+ Acumulare ('+(recScore?.f2??0)+'/'+(recScore?.maxF2??8)+') '
       +'+ Confirmare ('+(recScore?.f3??0)+'/'+(recScore?.maxF3??5)+'). '
       +'Contextul macro rămâne bearish — confirmă cu închidere săptămânală deasupra EMA200.';
+  } else if(contextBear && !reentryBounce &&
+             (recScore?.f1??0) >= 3 &&
+             (recScore?.f2??0) >= 2) {
+    alertColor = '#ffb300';
+    alertTitle = '⚡ RECOVERY TIMPURIU — Semne incipiente';
+    alertDetail = 'Capitulare parțială ('+(recScore?.f1??0)+'/'+(recScore?.maxF1??7)+') '
+      +'+ acumulare incipientă ('+(recScore?.f2??0)+'/'+(recScore?.maxF2??8)+'). '
+      +'⚠ Risc dead cat bounce — NU intra. Confirmarea necesită F3 ≥ 3 și închidere săptămânală deasupra EMA200. '
+      +'Monitorizează Higher Lows și volumul pe creșteri.';
   } else if(contextBear && triggerBull && !triggerBear) {
     alertColor = '#a78bfa';
     alertTitle = '↗ COUNTER-TREND BOUNCE — Relief rally în bear market';
