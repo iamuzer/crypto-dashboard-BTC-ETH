@@ -491,6 +491,51 @@ footer{font-family:'Space Mono',monospace;font-size:.54rem;color:var(--neutral);
     </div>
   </div>
 
+  <!-- RE-ENTRY BOUNCE SECTION -->
+  <div id="sec-reentry-bounce" style="display:none;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.25);border-radius:12px;padding:16px 18px;margin-bottom:14px">
+    <div style="font-family:'Space Mono',monospace;font-size:.68rem;font-weight:700;color:#a78bfa;margin-bottom:12px;letter-spacing:.08em">
+      ↗ RE-ENTRY BOUNCE — Recovery tehnic posibil
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+      <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:10px">
+        <div style="font-size:.52rem;color:#4a6080;margin-bottom:3px">RSI 1D</div>
+        <div style="font-size:.72rem;font-weight:700;color:#a78bfa" id="re-rsi">—</div>
+      </div>
+      <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:10px">
+        <div style="font-size:.52rem;color:#4a6080;margin-bottom:3px">ETH Relative</div>
+        <div style="font-size:.72rem;font-weight:700;color:#00e87a" id="re-eth">—</div>
+      </div>
+      <div style="background:rgba(0,0,0,.2);border-radius:8px;padding:10px">
+        <div style="font-size:.52rem;color:#4a6080;margin-bottom:3px">Drawdown</div>
+        <div style="font-size:.72rem;font-weight:700;color:#ff3355" id="re-dd">—</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+      <div style="background:rgba(255,51,85,.08);border:1px solid rgba(255,51,85,.2);border-radius:6px;padding:8px;text-align:center">
+        <div style="font-size:.5rem;color:#4a6080;margin-bottom:2px">🛑 Stop</div>
+        <div style="font-size:.66rem;font-weight:700;color:#ff3355" id="re-stop">—</div>
+      </div>
+      <div style="background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.2);border-radius:6px;padding:8px;text-align:center">
+        <div style="font-size:.5rem;color:#4a6080;margin-bottom:2px">🎯 Target 1</div>
+        <div style="font-size:.66rem;font-weight:700;color:#00e87a" id="re-t1">—</div>
+      </div>
+      <div style="background:rgba(0,232,122,.08);border:1px solid rgba(0,232,122,.2);border-radius:6px;padding:8px;text-align:center">
+        <div style="font-size:.5rem;color:#4a6080;margin-bottom:2px">🎯 Target 2</div>
+        <div style="font-size:.66rem;font-weight:700;color:#00e87a" id="re-t2">—</div>
+      </div>
+      <div style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);border-radius:6px;padding:8px;text-align:center">
+        <div style="font-size:.5rem;color:#4a6080;margin-bottom:2px">⚖ Risk/Reward</div>
+        <div style="font-size:.66rem;font-weight:700;color:#a78bfa" id="re-rr">—</div>
+      </div>
+    </div>
+    <div style="font-size:.58rem;color:#4a6080;margin-bottom:10px;line-height:1.6">
+      ⚠ Intrare parțială 10-20% · Stop strâns sub low recent · Nu adăuga fără confirmare MACD 4H bullish · Target 1 = EMA50 daily · Target 2 = Kijun 1W
+    </div>
+    <button id="re-journal-prompt" onclick="journalOpenDecision('reentry')" style="display:none;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.4);color:#a78bfa;padding:8px 16px;border-radius:6px;cursor:pointer;font-family:'Space Mono',monospace;font-size:.62rem;width:100%">
+      📝 Loghează decizie de re-intrare în Journal →
+    </button>
+  </div>
+
   <!-- EMA200 Distance + RSI Daily -->
   <div class="section" id="sec-ema200" style="display:none">
     <div class="sec-header"><div class="sec-bar" style="background:var(--warn)"></div><div class="sec-title">EMA200 Distanță + RSI Daily</div><span class="src-tag">Binance 1D klines · 200 zile</span></div>
@@ -899,8 +944,8 @@ async function fetchAllData() {
     fetch('https://fapi.binance.com/futures/data/openInterestHist?symbol=BTCUSDT&period=4h&limit=2').then(r=>r.json()),
     fetch('https://api.alternative.me/fng/?limit=1').then(r=>r.json()),
     fetch('https://api.coingecko.com/api/v3/global').then(r=>r.json()),
-    fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=60').then(r=>r.json()),
-    fetch('https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1w&limit=60').then(r=>r.json()),
+    fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=104').then(r=>r.json()),
+    fetch('https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1w&limit=104').then(r=>r.json()),
     fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1M&limit=36').then(r=>r.json()),
     fetch('https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1M&limit=36').then(r=>r.json()),
     fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=120').then(r=>r.json()),
@@ -2135,7 +2180,7 @@ function buildActionMap(coin, price, riskScore, rsiDaily, rsiWeekly, ema200Dist,
 // ═══════════════════════════════════════════════════════
 // ALERT BANNER — Short-term bearish signal detector
 // ═══════════════════════════════════════════════════════
-function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confMacro, confMicro, trendlineData, rsiB1d) {
+function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confMacro, confMicro, trendlineData, rsiB1d, reentryBounce, reentryData) {
   const banner = $('alert-banner');
   if(!banner) return;
 
@@ -2181,26 +2226,7 @@ function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confM
     && (ema200BTC?.dist ?? 0) < -10
     && rsi4hVal < 25
     && fgExtremeOrMissing;
-  // ── RE-ENTRY BOUNCE ────────────────────────────────────────────────
-  // Semnal tactic în bear market — re-intrare parțială 10-20% după bounce
-  const ema200DistVal = ema200BTC?.dist ?? 0;
-  const btcPriceNow   = d.btcPrice ?? 0;
-  // Drawdown față de high-ul din ultimele 30 de zile (proxy: EMA200 dist + extra)
-  // Aproximăm cu EMA200 dist < -15% ca indicator de drawdown semnificativ
-  const drawdownSignificant = ema200DistVal < -15;
-  const rsiD1d      = rsiB1d?.rsi    ?? 50;
-  const rsiD1dPrev  = rsiB1d?.prev   ?? rsiD1d;
-  const rsiRiseStrong       = (rsiD1d - rsiD1dPrev) > 2;
-  const rsiComingFromOversold = rsiD1dPrev < 40;
-
-  const reentryBounce = contextBear
-    && rsiD1d < 45
-    && rsiRiseStrong              // RSI crește cu cel puțin 2 puncte
-    && rsiComingFromOversold      // venea din zona oversold
-    && drawdownSignificant        // sub -15% față de EMA200 (proxy drawdown)
-    && eth_state !== 'WEAKNESS'   // ETH nu mai subperformează
-    && !crashExhaustion;          // semnal distinct de EPUIZARE
-
+  // reentryBounce calculat în refresh() și pasat ca parametru
   const contextClear = contextBear || contextBull; // context neclar → nu generăm alertă direcțională
 
   // ─────────────────────────────────────────────────────
@@ -2330,7 +2356,17 @@ function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confM
   // ── BULL TRAP în bear market ──────────────────────────
   // Context bearish + trigger bullish = NU "Setup bullish"
   // ci "Counter-trend bounce"
-  if(contextBear && triggerBull && !triggerBear) {
+  if(reentryBounce) {
+    alertColor = '#a78bfa';
+    alertTitle = '↗ RE-ENTRY BOUNCE — Recovery tehnic posibil';
+    alertDetail =
+      'RSI 1D iese din oversold (+'+(reentryData?.rsiRise??0).toFixed(1)+' puncte față de ieri) '
+      +'cu ETH Relative '+(reentryData?.ethState??'NEUTRU')+'. '
+      +'Drawdown față de EMA200: '+(reentryData?.ema200Dist??0).toFixed(1)+'%. '
+      +'Stop sugerat: '+fmt(reentryData?.stopLevel??0)+' · Target 1: '+fmt(reentryData?.target1??0)
+      +' · Target 2: '+fmt(reentryData?.target2??0)+'. '
+      +'Intrare parțială 10-20% — confirmă cu MACD 4H bullish.';
+  } else if(contextBear && triggerBull && !triggerBear) {
     alertColor = '#a78bfa';
     alertTitle = '↗ COUNTER-TREND BOUNCE — Relief rally în bear market';
     alertDetail = 'Context macro rămâne bearish. ' +
@@ -2827,9 +2863,197 @@ function trendlineStatusText(tl, currentPrice, tf) {
 }
 
 // ── Render one timeframe block ─────────────────────────
-function renderTFBlock(label, tlDesc, tlAsc, currentPrice, fibMicro, fibMedium, fibMacro, tf) {
+function renderTFBlock(label, tlDesc, tlAsc, currentPrice, fibMicro, fibMedium, fibMacro, tf, closesForChart, candlesForChart) {
   const blocks = [];
 
+  // ── SVG chart generator ──────────────────────────────────────────
+  // Unique ID for each chart (avoids tooltip conflicts)
+  const chartUID = label.replace(/[^a-z0-9]/gi,'') + tf + (tlDesc?'d':'') + (tlAsc?'a':'') + Math.random().toString(36).slice(2,6);
+
+  function makeSVG(closes, tl1, tl2, price, candles) {
+    if(!closes || closes.length < 5) return '';
+    const displayN = tf==='1W'?52:tf==='1D'?90:120;
+    const data = closes.slice(-displayN);
+    const n = data.length;
+    const W=520, H=150, padL=52, padR=12, padT=10, padB=28;
+    const chartW=W-padL-padR, chartH=H-padT-padB;
+
+    const mn = Math.min(...data), mx = Math.max(...data);
+    const range = mx - mn || 1;
+    // Add 10% padding to price range
+    const lo = mn - range*0.08, hi = mx + range*0.08;
+    const scaleX = i => padL + (i/(n-1))*chartW;
+    const scaleY = v => padT + (1-(v-lo)/(hi-lo))*chartH;
+
+    // Price line path
+    const pts = data.map((v,i)=>`${scaleX(i).toFixed(1)},${scaleY(v).toFixed(1)}`).join(' ');
+    const pricePath = `M ${pts.split(' ').join(' L ')}`;
+
+    // Area fill under price line
+    const firstX=scaleX(0), lastX=scaleX(n-1), botY=padT+chartH;
+    const areaPath=`M ${firstX},${scaleY(data[0])} L ${pts.split(' ').join(' L ')} L ${lastX},${botY} L ${firstX},${botY} Z`;
+
+    // Trendline renderer
+    function tlPath(tl, color) {
+      if(!tl||!tl.points||tl.points.length<2) return '';
+      // Map pivot indices to display range
+      const totalLen = closes.length;
+      const startDisplay = totalLen - displayN;
+      const projNow = tl.projectedNow;
+
+      // Get first and last pivot in display space
+      const pivots = tl.points.filter(p => p.idx >= startDisplay);
+      if(pivots.length < 1) {
+        // Extrapolate from trendline slope
+        const p0 = tl.points[0], p1 = tl.points[tl.points.length-1];
+        const slope = (p1.price - p0.price)/(p1.idx - p0.idx||1);
+        const startI = Math.max(0, startDisplay - p0.idx);
+        const x0 = padL, y0 = scaleY(p0.price + slope*startI);
+        const x1 = scaleX(n-1), y1 = scaleY(projNow);
+        return `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.8"/>`;
+      }
+      const first = pivots[0];
+      const last  = pivots[pivots.length-1];
+      const x0 = scaleX(first.idx - startDisplay);
+      const y0 = scaleY(first.price);
+      const x1 = scaleX(n-1);
+      const y1 = scaleY(projNow);
+      let out = `<line x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="${color}" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.85"/>`;
+      // Pivot dots
+      pivots.forEach(p => {
+        const px = scaleX(p.idx - startDisplay);
+        const py = scaleY(p.price);
+        out += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="3" fill="${color}" opacity="0.9"/>`;
+      });
+      return out;
+    }
+
+    // Compression zone fill
+    function compressionZone(tl1, tl2) {
+      if(!tl1||!tl2) return '';
+      const totalLen = closes.length;
+      const startDisplay = totalLen - displayN;
+      const x0 = padL, x1 = scaleX(n-1);
+      const yDesc = scaleY(tl1.projectedNow);
+      const yAsc  = scaleY(tl2.projectedNow);
+      const yTop  = Math.min(yDesc,yAsc), yBot = Math.max(yDesc,yAsc);
+      return `<rect x="${x0}" y="${yTop.toFixed(1)}" width="${(x1-x0).toFixed(1)}" height="${(yBot-yTop).toFixed(1)}" fill="rgba(167,139,250,0.07)" rx="2"/>`;
+    }
+
+    // Current price line
+    const priceY = scaleY(price);
+    const priceLineColor = '#e8f0f8';
+
+    // Break/test markers
+    function breakMarker(tl, color) {
+      if(!tl || (!tl.isBreak && !tl.isTest)) return '';
+      const x = scaleX(n-1);
+      const y = scaleY(tl.projectedNow);
+      const label = tl.isBreak ? 'BREAK' : 'TEST';
+      return `<text x="${(x-2).toFixed(1)}" y="${(y-5).toFixed(1)}" fill="${color}" font-size="7" font-family="monospace" text-anchor="end" opacity="0.9">${label}</text>`;
+    }
+
+    const comprZone = (tl1&&tl2) ? compressionZone(
+      tl1.type==='descending'?tl1:tl2,
+      tl1.type==='ascending'?tl1:tl2
+    ) : '';
+
+    // ── Y axis labels (4 price levels) ─────────────────────────────
+    const yTicks = 4;
+    let yAxisHTML = '';
+    for(let t=0;t<=yTicks;t++) {
+      const val = lo + (hi-lo)*t/yTicks;
+      const y   = scaleY(val);
+      const lbl = val >= 1000 ? '$'+(val/1000).toFixed(0)+'K' : '$'+val.toFixed(0);
+      yAxisHTML += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${(W-padR).toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(255,255,255,0.04)" stroke-width="0.8"/>`;
+      yAxisHTML += `<text x="${(padL-4).toFixed(1)}" y="${(y+3).toFixed(1)}" fill="#4a6080" font-size="7" font-family="monospace" text-anchor="end">${lbl}</text>`;
+    }
+
+    // ── X axis labels — real timestamps from candle data ───────────
+    const xTickCount = 4;
+    let xAxisHTML = '';
+    // Use real candle timestamps if available, fallback to estimation
+    const realTs = candles && candles.length >= n
+      ? candles.slice(-n).map(k => k.ts)
+      : null;
+    const msPerCandle = tf==='1W'?7*24*3600000:tf==='1D'?24*3600000:4*3600000;
+    const nowMs = Date.now();
+    for(let t=0;t<=xTickCount;t++) {
+      const di  = Math.round(t*(n-1)/xTickCount);
+      const x   = scaleX(di);
+      const tsMs = realTs
+        ? realTs[di]
+        : nowMs - (n-1-di)*msPerCandle;
+      const dt  = new Date(tsMs);
+      const lbl = tf==='1W'
+        ? dt.toLocaleDateString('ro-RO',{month:'short',year:'2-digit'})
+        : tf==='1D'
+          ? dt.toLocaleDateString('ro-RO',{day:'numeric',month:'short'})
+          : dt.toLocaleDateString('ro-RO',{day:'numeric',month:'short'})+' '+dt.getHours()+'h';
+      xAxisHTML += `<line x1="${x.toFixed(1)}" y1="${padT}" x2="${x.toFixed(1)}" y2="${(padT+chartH).toFixed(1)}" stroke="rgba(255,255,255,0.04)" stroke-width="0.8"/>`;
+      xAxisHTML += `<text x="${x.toFixed(1)}" y="${(H-padB+12).toFixed(1)}" fill="#4a6080" font-size="7" font-family="monospace" text-anchor="middle">${lbl}</text>`;
+    }
+
+    // ── Hover crosshair + tooltip (SVG + JS) ─────────────────────────
+    const svgId   = 'svg-'+chartUID;
+    const ttId    = 'tt-'+chartUID;
+    const crossId = 'cx-'+chartUID;
+    // Precompute data points as JSON for hover
+    const dataPts = data.map((v,i)=>{
+      const tsMs = realTs ? realTs[i] : nowMs-(n-1-i)*msPerCandle;
+      const dt   = new Date(tsMs);
+      const lbl  = tf==='1W'
+        ? dt.toLocaleDateString('ro-RO',{day:'numeric',month:'short',year:'2-digit'})
+        : tf==='1D'
+          ? dt.toLocaleDateString('ro-RO',{day:'numeric',month:'short',year:'2-digit'})
+          : dt.toLocaleDateString('ro-RO',{day:'numeric',month:'short'})+' '+dt.getHours()+'h';
+      return {x:+scaleX(i).toFixed(1),y:+scaleY(v).toFixed(1),v:Math.round(v),lbl};
+    });
+
+    const _svgHTML = `<div style="position:relative;margin-bottom:10px">
+    <svg id="${svgId}" viewBox="0 0 ${W} ${H}" style="width:100%;height:150px;display:block;border-radius:6px;background:rgba(0,0,0,.3);cursor:crosshair"
+      onmousemove="svgHover(event,'${svgId}','${ttId}','${crossId}')"
+      onmouseleave="svgLeave('${ttId}','${crossId}')">
+      <defs>
+        <linearGradient id="pg${chartUID}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4a6080" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#4a6080" stop-opacity="0.02"/>
+        </linearGradient>
+        <clipPath id="cp${chartUID}">
+          <rect x="${padL}" y="${padT}" width="${chartW}" height="${chartH}"/>
+        </clipPath>
+      </defs>
+      ${yAxisHTML}${xAxisHTML}
+      <g clip-path="url(#cp${chartUID})">
+        ${comprZone}
+        <path d="${areaPath}" fill="url(#pg${chartUID})" />
+        <path d="${pricePath}" fill="none" stroke="#4a6080" stroke-width="1.5" opacity="0.8"/>
+        ${tl1 ? tlPath(tl1, tl1.type==='descending'?'#ff3355':'#00e87a') : ''}
+        ${tl2 ? tlPath(tl2, tl2.type==='descending'?'#ff3355':'#00e87a') : ''}
+      </g>
+      ${tl1 ? breakMarker(tl1, tl1.type==='descending'?'#00e87a':'#ff3355') : ''}
+      ${tl2 ? breakMarker(tl2, tl2.type==='descending'?'#00e87a':'#ff3355') : ''}
+      <line x1="${padL}" y1="${priceY.toFixed(1)}" x2="${(W-padR).toFixed(1)}" y2="${priceY.toFixed(1)}" stroke="${priceLineColor}" stroke-width="0.8" stroke-dasharray="2,4" opacity="0.5"/>
+      <text x="${(W-padR-2).toFixed(1)}" y="${(priceY-3).toFixed(1)}" fill="${priceLineColor}" font-size="7.5" font-family="monospace" text-anchor="end" opacity="0.7">${fmt(price)}</text>
+      <!-- Crosshair (hidden by default) -->
+      <g id="${crossId}" style="display:none">
+        <line id="${crossId}-vl" x1="0" y1="${padT}" x2="0" y2="${(padT+chartH).toFixed(1)}" stroke="rgba(255,255,255,0.3)" stroke-width="0.8" stroke-dasharray="3,3"/>
+        <line id="${crossId}-hl" x1="${padL}" y1="0" x2="${(W-padR).toFixed(1)}" y2="0" stroke="rgba(255,255,255,0.3)" stroke-width="0.8" stroke-dasharray="3,3"/>
+        <circle id="${crossId}-dot" cx="0" cy="0" r="3.5" fill="#e8f0f8" stroke="#0c1118" stroke-width="1"/>
+      </g>
+    </svg>
+    <!-- Hover tooltip -->
+    <div id="${ttId}" style="display:none;position:absolute;background:rgba(10,18,28,.95);border:1px solid rgba(255,255,255,.15);border-radius:5px;padding:5px 9px;font-family:'Space Mono',monospace;font-size:.6rem;color:#e8f0f8;pointer-events:none;z-index:10;white-space:nowrap"></div>
+    </div>`;
+  // Store pts on SVG element after it's rendered (deferred)
+  setTimeout(()=>{
+    const svgEl=document.getElementById(svgId);
+    if(svgEl) svgEl._chartPts=dataPts;
+  },0);
+    return _svgHTML;
+  }
+
+  // ── Trendline card renderer ──────────────────────────────────────
   const renderTL = (tl) => {
     if(!tl) return null;
     const dir   = tl.type === 'ascending' ? 'ascendent' : 'descendent';
@@ -2848,12 +3072,16 @@ function renderTFBlock(label, tlDesc, tlAsc, currentPrice, fibMicro, fibMedium, 
       lines.push(`Nicio confluență Fibonacci la nivelul trendline-ului ${dir}`);
     }
 
+    // SVG for this single trendline
+    const svg = closesForChart ? makeSVG(closesForChart, tl, null, currentPrice, candlesForChart) : '';
+
     return `<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-left:3px solid ${color};border-radius:8px;padding:15px 17px;margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
         <span style="font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;color:${color};letter-spacing:.08em">TRENDLINE ${dir.toUpperCase()}</span>
         <span style="font-family:'Space Mono',monospace;font-size:.62rem;font-weight:700;padding:3px 10px;border-radius:4px;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}55">${statusLabel}</span>
         <span style="font-family:'Space Mono',monospace;font-size:.58rem;color:#7a96b0">${tl.touchCount} pivot points · ${label}</span>
       </div>
+      ${svg}
       ${lines.map(l=>`<div style="font-size:.76rem;color:#d0e4f0;line-height:1.8;margin-bottom:3px">→ ${l}</div>`).join('')}
     </div>`;
   };
@@ -2862,13 +3090,15 @@ function renderTFBlock(label, tlDesc, tlAsc, currentPrice, fibMicro, fibMedium, 
   const ascHTML  = renderTL(tlAsc);
 
   if(descHTML && ascHTML) {
-    // Both active — compression
+    // Both active — compression — show combined chart
+    const svgBoth = closesForChart ? makeSVG(closesForChart, tlDesc, tlAsc, currentPrice, candlesForChart) : '';
     const compressRange = Math.abs(tlDesc.projectedNow - tlAsc.projectedNow);
     const compressPct   = (compressRange / currentPrice * 100).toFixed(1);
     blocks.push(descHTML);
     blocks.push(ascHTML);
     blocks.push(`<div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:11px 14px">
       <div style="font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;color:#a78bfa;margin-bottom:8px;letter-spacing:.06em">⚡ STRUCTURĂ: Compresie — ${label}</div>
+      ${svgBoth}
       <div style="font-size:.76rem;color:#d0e4f0;line-height:1.8">→ Prețul între trendline descendent (${fmt(tlDesc.projectedNow)}) și ascendent (${fmt(tlAsc.projectedNow)})<br>
       → Interval de compresie: ${fmt(compressRange)} (${compressPct}%)<br>
       → Așteptăm invalidare: închidere ${tf==='1W'?'weekly':tf==='1D'?'daily':'4H'} deasupra ${fmt(tlDesc.projectedNow)} sau sub ${fmt(tlAsc.projectedNow)}</div>
@@ -2888,7 +3118,7 @@ function renderTFBlock(label, tlDesc, tlAsc, currentPrice, fibMicro, fibMedium, 
 }
 
 // ── Main render function ───────────────────────────────
-function renderTrendlines(coin, closes4H, closesD, closesW, currentPrice, fibMicro, fibMedium, fibMacro) {
+function renderTrendlines(coin, closes4H, closesD, closesW, currentPrice, fibMicro, fibMedium, fibMacro, candles4H, candlesD, candlesW) {
   const coinLow = coin.toLowerCase();
   const el = $('tl-'+coinLow+'-content');
   if(!el) return;
@@ -2910,9 +3140,9 @@ function renderTrendlines(coin, closes4H, closesD, closesW, currentPrice, fibMic
   const tl4H_asc  = buildTrendline(closes4H, sw4H.lows,  'ascending');
 
   el.innerHTML =
-    renderTFBlock('1W — Macro', tl1W_desc, tl1W_asc, currentPrice, fibMicro, fibMedium, fibMacro, '1W') +
-    renderTFBlock('1D — Mediu', tl1D_desc, tl1D_asc, currentPrice, fibMicro, fibMedium, fibMacro, '1D') +
-    renderTFBlock('4H — Micro', tl4H_desc, tl4H_asc, currentPrice, fibMicro, fibMedium, fibMacro, '4H');
+    renderTFBlock('1W — Macro', tl1W_desc, tl1W_asc, currentPrice, fibMicro, fibMedium, fibMacro, '1W', closesW, candlesW) +
+    renderTFBlock('1D — Mediu', tl1D_desc, tl1D_asc, currentPrice, fibMicro, fibMedium, fibMacro, '1D', closesD, candlesD) +
+    renderTFBlock('4H — Micro', tl4H_desc, tl4H_asc, currentPrice, fibMicro, fibMedium, fibMacro, '4H', closes4H, candles4H);
 
   return { tl1W_desc, tl1W_asc, tl1D_desc, tl1D_asc, tl4H_desc, tl4H_asc };
 }
@@ -2922,7 +3152,93 @@ function renderTrendlines(coin, closes4H, closesD, closesW, currentPrice, fibMic
 // ═══════════════════════════════════════════════════════
 const JOURNAL_KEY = 'cryptorisk_v4_journal_v2';
 let _journalFilter = 'all';
+// ── SVG Chart Hover Functions ─────────────────────────────────────
+function svgHover(evt, svgId, ttId, crossId) {
+  const svg   = document.getElementById(svgId);
+  const tt    = document.getElementById(ttId);
+  const cross = document.getElementById(crossId);
+  if(!svg||!tt||!cross) return;
+
+  const rect  = svg.getBoundingClientRect();
+  const svgW  = rect.width, svgH = rect.height;
+  // Map mouse to SVG viewBox coordinates
+  const vbW = 520, vbH = 150;
+  const mx  = (evt.clientX - rect.left) / svgW * vbW;
+  const my  = (evt.clientY - rect.top)  / svgH * vbH;
+
+  // Find closest data point
+    const svgEl = document.getElementById(svgId);
+  const pts = svgEl ? svgEl._chartPts : null;
+  if(!pts||!pts.length) return;
+  let closest = null, minDist = Infinity;
+  pts.forEach(p => {
+    const d = Math.abs(p.x - mx);
+    if(d < minDist) { minDist=d; closest=p; }
+  });
+  if(!closest || minDist > 20) { svgLeave(ttId, crossId); return; }
+
+  // Show crosshair
+  cross.style.display = 'block';
+  const vl  = document.getElementById(crossId+'-vl');
+  const hl  = document.getElementById(crossId+'-hl');
+  const dot = document.getElementById(crossId+'-dot');
+  if(vl)  { vl.setAttribute('x1',closest.x); vl.setAttribute('x2',closest.x); }
+  if(hl)  { hl.setAttribute('y1',closest.y); hl.setAttribute('y2',closest.y); }
+  if(dot) { dot.setAttribute('cx',closest.x); dot.setAttribute('cy',closest.y); }
+
+  // Show tooltip
+  tt.style.display = 'block';
+  tt.innerHTML = '<span style="color:#4a6080">' + (typeof closest.lbl==='function'?closest.lbl():closest.lbl||'') + '</span>  <strong>$' + closest.v.toLocaleString('en-US') + '</strong>';
+
+  // Position tooltip (keep inside container)
+  const ttW = 160, ttH = 30;
+  const pct = (evt.clientX - rect.left) / svgW;
+  let left  = (evt.clientX - rect.left) + 10;
+  let top   = (evt.clientY - rect.top)  - 36;
+  if(left + ttW > svgW) left = left - ttW - 18;
+  if(top < 0) top = 4;
+  tt.style.left = left + 'px';
+  tt.style.top  = top  + 'px';
+}
+function svgLeave(ttId, crossId) {
+  const tt    = document.getElementById(ttId);
+  const cross = document.getElementById(crossId);
+  if(tt)    tt.style.display    = 'none';
+  if(cross) cross.style.display = 'none';
+}
+
 let _journalLastData = null; // stores last refresh data for snapshots
+
+// ── RE-ENTRY BOUNCE SECTION UPDATE ─────────────────────────────────
+function updateReentrySection(active, data, btcPrice) {
+  const sec = $('sec-reentry-bounce');
+  if(!sec) return;
+
+  if(!active) {
+    sec.style.display = 'none';
+    return;
+  }
+
+  sec.style.display = 'block';
+
+  // Populate fields
+  const set = (id, val) => { const el=$(id); if(el) el.textContent=val; };
+  const riskReward = data.target1 && data.stopLevel && btcPrice
+    ? ((data.target1 - btcPrice) / (btcPrice - data.stopLevel)).toFixed(1)
+    : '—';
+
+  set('re-rsi',      data.rsiD1d + ' (↑ +' + data.rsiRise + ' față de ieri)');
+  set('re-eth',      data.ethState);
+  set('re-dd',       data.ema200Dist + '% față de EMA200');
+  set('re-stop',     data.stopLevel ? '$' + data.stopLevel.toLocaleString('en-US') : '—');
+  set('re-t1',       data.target1   ? '$' + data.target1.toLocaleString('en-US')   : '—');
+  set('re-t2',       data.target2   ? '$' + data.target2.toLocaleString('en-US')   : '—');
+  set('re-rr',       riskReward + 'R');
+
+  // Journal prompt — show auto-open button
+  const jpBtn = $('re-journal-prompt');
+  if(jpBtn) jpBtn.style.display = 'block';
+}
 
 function journalLoad() {
   try { return JSON.parse(localStorage.getItem(JOURNAL_KEY)) || []; } catch { return []; }
@@ -3120,9 +3436,22 @@ function journalManualSnapshot() {
 }
 
 // ── Decision modal ────────────────────────────────────
-function journalOpenDecision() {
+function journalOpenDecision(context) {
   $('j-decision-modal').style.display = 'block';
   $('j-decision-modal').scrollIntoView({ behavior:'smooth', block:'start' });
+  // Auto-fill if called from Re-entry bounce context
+  if(context === 'reentry') {
+    const actionEl = $('jd-action');
+    const motivEl  = $('jd-motiv');
+    if(actionEl) actionEl.value = 'buy';
+    if(motivEl && motivEl.value === '') {
+      const stop = $('re-stop')?.textContent ?? '—';
+      const t1   = $('re-t1')?.textContent   ?? '—';
+      const t2   = $('re-t2')?.textContent   ?? '—';
+      const rr   = $('re-rr')?.textContent   ?? '—';
+      motivEl.value = 'RE-ENTRY BOUNCE — RSI iese din oversold · Stop: ' + stop + ' · T1: ' + t1 + ' · T2: ' + t2 + ' · R/R: ' + rr;
+    }
+  }
 }
 function journalCloseDecision() {
   $('j-decision-modal').style.display = 'none';
@@ -3364,8 +3693,8 @@ async function refresh() {
     // ── MACRO: Trendline Detection ──
     const btcCloses4H=d.btc4H.map(x=>x.close), btcClosesD=d.btcD.map(x=>x.close), btcClosesW=d.btcW.map(x=>x.close);
     const ethCloses4H=d.eth4H.map(x=>x.close), ethClosesD=d.ethD.map(x=>x.close), ethClosesW=d.ethW.map(x=>x.close);
-    const tlDataBTC = renderTrendlines('BTC', btcCloses4H, btcClosesD, btcClosesW, d.btcPrice, fibBTC?.fibMicro, fibBTC?.fibMedium, fibBTC?.fibMacro);
-    renderTrendlines('ETH', ethCloses4H, ethClosesD, ethClosesW, d.ethPrice, fibETH?.fibMicro, fibETH?.fibMedium, fibETH?.fibMacro);
+    const tlDataBTC = renderTrendlines('BTC', btcCloses4H, btcClosesD, btcClosesW, d.btcPrice, fibBTC?.fibMicro, fibBTC?.fibMedium, fibBTC?.fibMacro, d.btc4H, d.btcD, d.btcW);
+    renderTrendlines('ETH', ethCloses4H, ethClosesD, ethClosesW, d.ethPrice, fibETH?.fibMicro, fibETH?.fibMedium, fibETH?.fibMacro, d.eth4H, d.ethD, d.ethW);
     show('sec-trendline-detect');
 
     // ── MACRO: Chikou 1M + Top/Bottom ──
@@ -3454,7 +3783,63 @@ async function refresh() {
     show('sec-conf-micro'); show('sec-risk-micro');
 
     // ── ALERT BANNER ──
-    updateAlertBanner(d,emaB,macdB,rsiB4h,ema200BTC,ethRelative,confMacro,confMicro,null,rsiB1d);
+    // ── RE-ENTRY BOUNCE — calculat în refresh() cu date complete ──
+    const _ema200Dist  = ema200BTC?.dist ?? 0;
+    const _rsiD1d      = rsiB1d?.rsi  ?? 50;
+    const _rsiD1dPrev  = rsiB1d?.prev ?? _rsiD1d;
+    const _rsiRise     = _rsiD1d - _rsiD1dPrev;
+    const _drawdownOk  = _ema200Dist < -15;
+    const _ethOk       = (ethRelative?.state ?? 'NEUTRU') !== 'WEAKNESS';
+    const _ctxBear     = confMacro?.dir === 'bear' || confMacro?.dir === 'partial_bear';
+
+    // Crash exhaustion proxy (RSI 4H extrem)
+    const _rsi4h       = rsiB4h?.rsi ?? 50;
+    const _fg          = d.fg ?? 50;
+    const _crashEx     = _ctxBear && _ema200Dist < -10 && _rsi4h < 25 && (_fg < 15 || _fg === 50);
+
+    const _reentryBounce = _ctxBear
+      && _rsiD1d < 45
+      && _rsiRise > 2
+      && _rsiD1dPrev < 40
+      && _drawdownOk
+      && _ethOk
+      && !_crashEx;
+
+    // Stop = min(ultimele 7 zile) × 0.99
+    const _btcD7 = (d.btcD || []).slice(-7);
+    const _stopLevel  = _btcD7.length > 0
+      ? Math.min(..._btcD7.map(x => x[3] ?? x.close ?? 0)) * 0.99
+      : d.btcPrice * 0.94;
+
+    // Target 1 = EMA50 daily (din emaB)
+    const _ema50 = (() => {
+      try {
+        const candles = d.btcD || [];
+        if(candles.length < 50) return null;
+        const closes = candles.map(x => x[4] ?? x.close ?? 0);
+        let e = closes.slice(0,50).reduce((a,b)=>a+b,0)/50;
+        const k = 2/51;
+        for(let i=50;i<closes.length;i++) e=closes[i]*k+e*(1-k);
+        return e;
+      } catch { return null; }
+    })();
+
+    // Target 2 = Kijun 1W
+    const _kijun1w = ichiRawB?.kijun ?? null;
+
+    const _reentryData = {
+      rsiD1d:    +_rsiD1d.toFixed(1),
+      rsiRise:   +_rsiRise.toFixed(1),
+      rsiPrev:   +_rsiD1dPrev.toFixed(1),
+      ethState:  ethRelative?.state ?? 'NEUTRU',
+      ema200Dist:+_ema200Dist.toFixed(1),
+      stopLevel: _stopLevel ? Math.round(_stopLevel) : 0,
+      target1:   _ema50    ? Math.round(_ema50)     : 0,
+      target2:   _kijun1w  ? Math.round(_kijun1w)   : 0,
+    };
+
+    updateAlertBanner(d,emaB,macdB,rsiB4h,ema200BTC,ethRelative,confMacro,confMicro,null,rsiB1d,_reentryBounce,_reentryData);
+    updateReentrySection(_reentryBounce, _reentryData, d.btcPrice);
 
     // ── CROSS-TF ──
     buildCrossTF(confMacro,confMicro,ichiRawB,trendData,d,rsiB1w,emaB,macdB,rsiB4h);
