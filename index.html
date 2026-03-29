@@ -3913,7 +3913,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     rsiOversold ? '< 30 — oversold extrem, capitulare posibilă' :
     rsiLow      ? '< 40 — territory scăzut, atenție' :
                   'RSI neutru sau ridicat',
-    C(rsiD1d>60, rsiOversold), rsiOversold?1:0);
+    C(rsiD1d>60, rsiOversold), rsiOversold ? 1 : rsiLow ? null : 0);
 
   // Fear & Greed
   const fgVal   = d.fg ?? 50;
@@ -3926,7 +3926,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     fgFear    ? '< 25 — frică, pesimism generalizat' :
     fgVal > 75 ? '> 75 — lăcomie extremă, risc top' :
                  'Sentiment neutru',
-    C(fgVal>75, fgExtreme||fgFear), (fgExtreme||fgFear)?1:0);
+    C(fgVal>75, fgExtreme||fgFear), fgExtreme ? 1 : fgFear ? null : fgVal>75 ? 0 : null);
 
   // Funding negativ simplu
   const fundNow    = d.btcFunding ?? 0;
@@ -3939,7 +3939,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     fundNeg     ? 'Funding negativ — piața plătește short-urile, semnal bullish' :
     fundNow > 0.05 ? 'Funding pozitiv ridicat — long-uri supraîncălzite' :
                      'Funding neutru',
-    C(fundNow>0.05, fundNeg), fundNeg?1:0);
+    C(fundNow>0.05, fundNeg), fundNeg ? 1 : fundNow>0.05 ? 0 : null);
 
   // RSI Divergence 1D — rsiB1d.arr calculat anterior
   const rsiArr1D = rsiB1d?.arr ?? [];
@@ -3951,7 +3951,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     rsiDiv1D === 'BULLISH' ? '↗ BULLISH' : rsiDiv1D === 'BEARISH' ? '↘ BEARISH' : '— NICIO',
     rsiDiv1D === 'BULLISH' ? 'Preț low nou dar RSI nu confirmă → semnal precoce' :
     rsiDiv1D === 'BEARISH' ? 'Preț high nou dar RSI scade → pericol' : 'Fără divergență detectată',
-    C(rsiDiv1D==='BEARISH', divBull), divBull?1:0);
+    C(rsiDiv1D==='BEARISH', divBull), divBull ? 1 : rsiDiv1D === 'BEARISH' ? 0 : null);
 
   // StochRSI 1D — cross din oversold
   const stochD=calcStochRSI(d.btcD||[],14,14);
@@ -3966,7 +3966,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     stochOversold?'< 20 — momentum epuizat, cross posibil':
     stochK>80?'> 80 — supracumpărat':
     `Zona neutră (prev:${stochKPrev?.toFixed(1)})`,
-    C(stochK>80,stochBull),stochBull?1:0);
+    C(stochK>80,stochBull), stochCross ? 1 : stochOversold ? null : stochK>80 ? 0 : null);
 
   // Funding cumulativ 5D
   const fundCum = calcFundingCumulative(d.btcFundHist, 5);
@@ -3977,7 +3977,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     fundBull ? `Short-urile devin prea scumpe (${fundCum.negCount}/${fundCum.total} plăți negative)` :
     fundCum.signal === 'LONG_EXPENSIVE' ? `Long-urile prea scumpe (${fundCum.negCount}/${fundCum.total} neg)` :
     `Neutru (${fundCum.negCount}/${fundCum.total} plăți negative)`,
-    C(fundCum.signal==='LONG_EXPENSIVE', fundBull), fundBull?1:0);
+    C(fundCum.signal==='LONG_EXPENSIVE', fundBull), fundBull ? 1 : fundCum.signal === 'LONG_EXPENSIVE' ? 0 : null);
 
   // Bollinger Bands
   const closes1D = d.btcD ? d.btcD.map(x=>x.close) : [];
@@ -3989,7 +3989,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
   recCard('rec-bb', 'Bollinger Bands 1D (20)',
     bb ? `${bb.pos === 'BELOW' ? '↓ SUB BANDA INF' : bb.pos === 'ABOVE' ? '↑ DEASUPRA' : '◈ INTERIOR'}` : '--',
     bb ? `Inf: ${fmt(bb.lower)} · MA: ${fmt(bb.ma)} · Sup: ${fmt(bb.upper)}${bbReentry?' ← reintrare în bandă!':''}` : 'Date insuficiente',
-    C(bb?.pos==='ABOVE', bbBull||bbReentry), (bbBull||bbReentry)?1:0);
+    C(bb?.pos==='ABOVE', bbBull||bbReentry), (bbBull||bbReentry) ? 1 : bb?.pos === 'ABOVE' ? null : 0);
 
   // ── FAZA 2 — ACUMULARE ───────────────────────────────────
 
@@ -4000,7 +4000,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
   recCard('rec-closes-1d', 'Structura Closes 1D',
     cls1D.dir === 'UP' ? `↑ ${cls1D.count} VERZI` : cls1D.dir === 'DOWN' ? `↓ ${cls1D.count} ROȘII` : '⟷ MIXT',
     `${cls1D.count > 0 ? cls1D.count+' closes consecutive ' : 'Fără direcție clară '}(${cls1D.pct>=0?'+':''}${cls1D.pct.toFixed(1)}% net)`,
-    C(cls1D.dir==='DOWN', cls1DBull), cls1DBull?1:0);
+    C(cls1D.dir==='DOWN', cls1DBull), cls1DBull ? 1 : cls1D.dir === 'DOWN' ? 0 : null);
 
   // Closes consecutive 4H (3+ consecutive)
   const cls4H = calcClosesStructure(d.btc4H || [], 3);
@@ -4009,7 +4009,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
   recCard('rec-closes-4h', 'Structura Closes 4H',
     cls4H.dir === 'UP' ? `↑ ${cls4H.count} VERZI` : cls4H.dir === 'DOWN' ? `↓ ${cls4H.count} ROȘII` : '⟷ MIXT',
     `${cls4H.count > 0 ? cls4H.count+' closes consecutive ' : 'Fără direcție clară '}(${cls4H.pct>=0?'+':''}${cls4H.pct.toFixed(1)}% net)`,
-    C(cls4H.dir==='DOWN', cls4HBull), cls4HBull?1:0);
+    C(cls4H.dir==='DOWN', cls4HBull), cls4HBull ? 1 : cls4H.dir === 'DOWN' ? 0 : null);
 
   // Higher Lows 4H (3 HL)
   const hl4H = calcHigherLows(d.btc4H || [], 3);
@@ -4017,7 +4017,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
   recCard('rec-hl-4h', 'Higher Lows 4H',
     hl4H.detected ? '✅ CONFIRMAT' : `${hl4H.count}/${hl4H.total} HL`,
     hl4H.detected ? '3 Higher Lows consecutivi — vânzătorii cedează' : 'Structura HL nu e completă',
-    C(false, hl4H.detected), hl4H.detected?1:0);
+    C(false, hl4H.detected), hl4H.detected ? 1 : hl4H.count > 0 ? null : 0);
 
   // Higher Lows 1D (2 HL)
   const hl1D = calcHigherLows(d.btcD || [], 2);
@@ -4025,7 +4025,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
   recCard('rec-hl-1d', 'Higher Lows 1D',
     hl1D.detected ? '✅ CONFIRMAT' : `${hl1D.count}/${hl1D.total} HL`,
     hl1D.detected ? '2 Higher Lows pe 1D — trend bullish macro în formare' : 'Fără Higher Low pe 1D',
-    C(false, hl1D.detected), hl1D.detected?1:0);
+    C(false, hl1D.detected), hl1D.detected ? 1 : hl1D.count > 0 ? null : 0);
 
   // Delta Volume cumulativ
   const dv = calcDeltaVolume(d.btcTakerHist || []);
@@ -4036,7 +4036,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     dv.trend === 'IMPROVING' ? `Cumpărătorii preiau controlul (ratio: ${dv.recentRatio})` :
     dv.trend === 'DETERIORATING' ? `Vânzătorii domină (ratio: ${dv.recentRatio})` :
     `Echilibrat (ratio: ${dv.recentRatio})`,
-    C(dv.trend==='DETERIORATING', dvBull), dvBull?1:0);
+    C(dv.trend==='DETERIORATING', dvBull), dvBull ? 1 : dv.trend === 'DETERIORATING' ? 0 : null);
 
   // Volume Profile POC
   const poc=calcVolumeProfilePOC(d.btcD||[],30,40);
@@ -4047,7 +4047,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     poc?fmt(poc.pocPrice):'--',
     poc?`${poc.abovePOC?'↑ Deasupra POC':'↓ Sub POC'} (dist:${poc.distPct>=0?'+':''}${poc.distPct}%)${poc.nearPOC?' ← nivel semnificativ':''}`:
     'Date insuficiente',
-    C(pocBear,pocBull),pocBull?1:0);
+    C(pocBear,pocBull), pocBull ? 1 : pocBear ? 0 : poc ? null : null);
 
   // Long/Short Ratio
   const lsRatio  = d.btcLS ?? 1;
@@ -4059,7 +4059,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     lsExtreme ? `< 0.8 — shorteri dominanți (${lsRatio.toFixed(2)}x), short squeeze posibil` :
     lsHigh    ? `> 1.3 — longi dominanți (${lsRatio.toFixed(2)}x), risc long squeeze` :
                 `Echilibrat (${lsRatio.toFixed(2)}x)`,
-    C(lsHigh, lsExtreme), lsExtreme?1:0);
+    C(lsHigh, lsExtreme), lsExtreme ? 1 : lsHigh ? 0 : null);
 
   // OI Stabilizat
   const oiNow  = d.btcOI     ?? 0;
@@ -4074,7 +4074,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     oiFalling ? 'OI în scădere — dezleverage / lichidări forțate' :
     oiChgPct > 3 ? 'OI crește rapid — leverage nou, risc volatilitate' :
                    `OI: $${(oiNow/1e9).toFixed(2)}B`,
-    C(oiChgPct>3, oiStable||oiFalling), (oiStable||oiFalling)?1:0);
+    C(oiChgPct>3, oiStable||oiFalling), oiStable||oiFalling ? 1 : oiChgPct>3 ? 0 : null);
 
   // ── FAZA 3 — CONFIRMARE (din indicatori existenți) ───────
 
@@ -4084,7 +4084,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
   recCard('rec-macd', 'MACD 4H',
     macdB ? (macdBull ? '↑ BULLISH CROSS' : macdB.bullish ? '↑ BULLISH' : '↓ BEARISH') : '--',
     macdBull ? 'Cross bullish confirmat pe 4H' : macdB?.bullish ? 'MACD deasupra Signal' : 'MACD sub Signal Line',
-    C(!macdB?.bullish, macdBull), macdBull?1:0);
+    C(!macdB?.bullish, macdBull), macdBull ? 1 : macdB?.bullish ? null : 0);
 
   // EMA Stack 4H
   const emaStackBull = emaB?.stackBull;
@@ -4093,7 +4093,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     emaStackBull ? '✅ BULLISH' : emaB?.stackBear ? '❌ BEARISH' : '◈ MIXT',
     emaStackBull ? 'EMA9 > EMA21 > EMA50 — momentum bullish complet' :
     emaB?.stackBear ? 'EMA9 < EMA21 < EMA50 — presiune bearish' : 'EMA-urile nu sunt aliniate',
-    C(emaB?.stackBear, emaStackBull), emaStackBull?1:0);
+    C(emaB?.stackBear, emaStackBull), emaStackBull ? 1 : emaB?.stackBear ? 0 : null);
 
   // ETH Relative
   const ethBull = ethRelative?.state === 'STRENGTH';
@@ -4103,7 +4103,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
     ethRelative?.state ?? '--',
     ethBull ? 'ETH outperformează BTC — risc-on activ' :
     ethWeak ? 'ETH subperformează — risc-off, atenție' : 'ETH neutru față de BTC',
-    C(ethWeak, ethBull), ethBull?1:0);
+    C(ethWeak, ethBull), ethBull ? 1 : ethWeak ? 0 : null);
 
   // Ichimoku TK cross
   const tkBull = ichiB?.tkBull;
@@ -4115,7 +4115,7 @@ function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB
 
   // Trendline Breakout
   const tlBreak = analyzeTrendlineBreakout(tlData);
-  const tlBullScore = tlBreak.bullBreak ? 1 : 0;
+  const tlBullScore = tlBreak.bullBreak ? 1 : tlBreak.bearBreak ? 0 : tlBreak.tests.length > 0 ? null : null;
   if(tlBreak.bullBreak) f3++;
   recCard('rec-trendline-break', 'Trendline Breakout',
     tlBreak.bullBreak ? '✅ BREAK BULLISH' :
