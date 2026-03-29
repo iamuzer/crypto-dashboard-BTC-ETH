@@ -762,6 +762,80 @@ footer{font-family:'Space Mono',monospace;font-size:.54rem;color:var(--neutral);
     <div class="rec-box" id="rec-micro">--</div>
   </div>
 
+
+  <!-- ── RECOVERY DETECTION MODULE ── -->
+  <div class="section" id="sec-recovery" style="display:none">
+    <div class="sec-header">
+      <div class="sec-bar" style="background:linear-gradient(180deg,#a78bfa,#00e87a)"></div>
+      <div class="sec-title">Recovery Detection</div>
+      <span class="src-tag">Observațional · Fără impact pe semnale</span>
+    </div>
+
+    <!-- Disclaimer dinamic din confMacro -->
+    <div id="rec-disclaimer" style="display:none;background:rgba(255,179,0,.08);border:1px solid rgba(255,179,0,.25);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:.66rem;color:var(--warn);line-height:1.7"></div>
+
+    <!-- Faza 1 — Capitulare -->
+    <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:#4a6080;letter-spacing:.1em;margin-bottom:8px;margin-top:4px">FAZA 1 — CAPITULARE</div>
+    <div class="g2" style="margin-bottom:14px">
+      <div class="card-sm" id="rec-rsi-oversold"></div>
+      <div class="card-sm" id="rec-fg"></div>
+      <div class="card-sm" id="rec-funding-neg"></div>
+      <div class="card-sm" id="rec-rsi-div"></div>
+      <div class="card-sm" id="rec-stoch"></div>
+      <div class="card-sm" id="rec-fund-cum"></div>
+      <div class="card-sm" id="rec-bb"></div>
+    </div>
+
+    <!-- Faza 2 — Acumulare -->
+    <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:#4a6080;letter-spacing:.1em;margin-bottom:8px">FAZA 2 — ACUMULARE</div>
+    <div class="g2" style="margin-bottom:14px">
+      <div class="card-sm" id="rec-closes-1d"></div>
+      <div class="card-sm" id="rec-closes-4h"></div>
+      <div class="card-sm" id="rec-hl-4h"></div>
+      <div class="card-sm" id="rec-hl-1d"></div>
+      <div class="card-sm" id="rec-delta-vol"></div>
+      <div class="card-sm" id="rec-vol-poc"></div>
+      <div class="card-sm" id="rec-ls"></div>
+      <div class="card-sm" id="rec-oi-stab"></div>
+    </div>
+
+    <!-- Faza 3 — Confirmare (din indicatori existenți) -->
+    <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:#4a6080;letter-spacing:.1em;margin-bottom:8px">FAZA 3 — CONFIRMARE (din indicatori existenți)</div>
+    <div class="g2" style="margin-bottom:14px">
+      <div class="card-sm" id="rec-macd"></div>
+      <div class="card-sm" id="rec-ema-stack"></div>
+      <div class="card-sm" id="rec-eth-rel"></div>
+      <div class="card-sm" id="rec-ichimoku"></div>
+      <div class="card-sm" id="rec-trendline-break"></div>
+    </div>
+
+    <!-- Scor sintetic -->
+    <div id="rec-score-panel" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 16px">
+      <div style="font-family:'Space Mono',monospace;font-size:.64rem;font-weight:700;margin-bottom:10px;color:var(--white)">▸ SCOR RECOVERY STRUCTURAL</div>
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="font-size:.56rem;color:#4a6080;margin-bottom:3px">FAZA 1</div>
+          <div style="font-size:1.1rem;font-weight:700" id="rec-score-f1">—/5</div>
+        </div>
+        <div style="font-size:1.4rem;color:#4a6080">→</div>
+        <div style="text-align:center">
+          <div style="font-size:.56rem;color:#4a6080;margin-bottom:3px">FAZA 2</div>
+          <div style="font-size:1.1rem;font-weight:700" id="rec-score-f2">—/8</div>
+        </div>
+        <div style="font-size:1.4rem;color:#4a6080">→</div>
+        <div style="text-align:center">
+          <div style="font-size:.56rem;color:#4a6080;margin-bottom:3px">FAZA 3</div>
+          <div style="font-size:1.1rem;font-weight:700" id="rec-score-f3">—/6</div>
+        </div>
+        <div style="flex:1;text-align:right">
+          <div style="font-size:.56rem;color:#4a6080;margin-bottom:3px">VERDICT</div>
+          <div style="font-size:.8rem;font-weight:700" id="rec-verdict">—</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;font-size:.64rem;color:#4a6080;line-height:1.7" id="rec-verdict-detail"></div>
+    </div>
+  </div>
+
 </div><!-- end tab-micro -->
 
 <!-- ══════════════════════ TAB JOURNAL ══════════════════════ -->
@@ -1002,7 +1076,9 @@ async function fetchAllData() {
     btcM, ethM,
     btc4H, eth4H,
     btcD, ethD,
-    btc1H, eth1H
+    btc1H, eth1H,
+    btcFundHist, ethFundHist,
+    btcTakerHist
   ] = await Promise.all([
     fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT').then(r=>r.json()),
     fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT').then(r=>r.json()),
@@ -1024,6 +1100,9 @@ async function fetchAllData() {
     fetch('https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&limit=220').then(r=>r.json()),
     fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=100').then(r=>r.json()),
     fetch('https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1h&limit=100').then(r=>r.json()),
+    fetch('https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=15').then(r=>r.json()),
+    fetch('https://fapi.binance.com/fapi/v1/fundingRate?symbol=ETHUSDT&limit=15').then(r=>r.json()),
+    fetch('https://fapi.binance.com/futures/data/takerlongshortRatio?symbol=BTCUSDT&period=4h&limit=12').then(r=>r.json()),
   ]);
 
   const parseK = raw => raw.map(k=>({ts:k[0],open:+k[1],high:+k[2],low:+k[3],close:+k[4],vol:+k[5]}));
@@ -1065,6 +1144,9 @@ async function fetchAllData() {
     ethD: parseK(ethD),
     btc1H: parseK(btc1H),
     eth1H: parseK(eth1H),
+    btcFundHist: Array.isArray(btcFundHist) ? btcFundHist.map(x=>({ts:+x.fundingTime, rate:+x.fundingRate*100})) : [],
+    ethFundHist: Array.isArray(ethFundHist) ? ethFundHist.map(x=>({ts:+x.fundingTime, rate:+x.fundingRate*100})) : [],
+    btcTakerHist: Array.isArray(btcTakerHist) ? btcTakerHist.map(x=>({ts:+x.timestamp, ratio:+x.buySellRatio, buyVol:+x.buyVol, sellVol:+x.sellVol})) : [],
   };
 }
 
@@ -1268,10 +1350,13 @@ function renderRSI(pfx,data,tf){
 // STOCH RSI + OBV (weekly)
 // ═══════════════════════════════════════════
 function calcStochRSI(candles,rp=14,sp=14){
-  const rd=calcRSI(candles,rp);if(!rd||rd.arr.length<sp)return null;
-  const a=rd.arr,n=a.length,sl=a.slice(n-sp);
-  const mn=Math.min(...sl),mx=Math.max(...sl);
-  return{k:mx===mn?50:((a[n-1]-mn)/(mx-mn))*100};
+  const rd=calcRSI(candles,rp);if(!rd||rd.arr.length<sp+1)return null;
+  const a=rd.arr,n=a.length;
+  const sl=a.slice(n-sp);const mn=Math.min(...sl),mx=Math.max(...sl);
+  const k=mx===mn?50:((a[n-1]-mn)/(mx-mn))*100;
+  const sl2=a.slice(n-sp-1,n-1);const mn2=Math.min(...sl2),mx2=Math.max(...sl2);
+  const kPrev=mx2===mn2?50:((a[n-2]-mn2)/(mx2-mn2))*100;
+  return{k,kPrev};
 }
 
 function renderStochOBV(candles,stoch){
@@ -2250,7 +2335,7 @@ function buildActionMap(coin, price, riskScore, rsiDaily, rsiWeekly, ema200Dist,
 // ═══════════════════════════════════════════════════════
 // ALERT BANNER — Short-term bearish signal detector
 // ═══════════════════════════════════════════════════════
-function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confMacro, confMicro, trendlineData, rsiB1d, reentryBounce, reentryData) {
+function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confMacro, confMicro, trendlineData, rsiB1d, reentryBounce, reentryData, recScore) {
   const banner = $('alert-banner');
   if(!banner) return;
 
@@ -2428,14 +2513,34 @@ function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confM
   // ci "Counter-trend bounce"
   if(reentryBounce) {
     alertColor = '#a78bfa';
-    alertTitle = '↗ RE-ENTRY BOUNCE — Recovery tehnic posibil';
+    // Modul A: qualifier bazat pe scorul Recovery
+    const recF2 = recScore?.f2 ?? 0;
+    const recF3 = recScore?.f3 ?? 0;
+    const reQual = recF2 >= 5 && recF3 >= 3 ? ' ✅ CU CONVINGERE'
+                 : recF2 >= 3 && recF3 >= 2 ? ' ⚠ CU REZERVE'
+                 : recF2 < 2                 ? ' ❌ PREMATUR — acumulare insuficientă'
+                 : '';
+    alertTitle = '↗ RE-ENTRY BOUNCE' + reQual;
     alertDetail =
       'RSI 1D iese din oversold (+'+(reentryData?.rsiRise??0).toFixed(1)+' puncte față de ieri) '
       +'cu ETH Relative '+(reentryData?.ethState??'NEUTRU')+'. '
       +'Drawdown față de EMA200: '+(reentryData?.ema200Dist??0).toFixed(1)+'%. '
       +'Stop sugerat: '+fmt(reentryData?.stopLevel??0)+' · Target 1: '+fmt(reentryData?.target1??0)
       +' · Target 2: '+fmt(reentryData?.target2??0)+'. '
-      +'Intrare parțială 10-20% — confirmă cu MACD 4H bullish.';
+      +'Recovery score: F1='+(recScore?.f1??0)+'/'+(recScore?.maxF1??7)
+      +' F2='+(recScore?.f2??0)+'/'+(recScore?.maxF2??8)
+      +' F3='+(recScore?.f3??0)+'/'+(recScore?.maxF3??5)+'.';
+  } else if(contextBear && !reentryBounce &&
+             (recScore?.f1??0) >= 4 &&
+             (recScore?.f2??0) >= 5 &&
+             (recScore?.f3??0) >= 3) {
+    alertColor = '#00e87a';
+    alertTitle = '🔄 RECOVERY STRUCTURAL — Schimbare de trend posibilă';
+    alertDetail = 'Toți 3 indicatorii de recovery confirmă: '
+      +'Capitulare ('+(recScore?.f1??0)+'/'+(recScore?.maxF1??7)+') '
+      +'+ Acumulare ('+(recScore?.f2??0)+'/'+(recScore?.maxF2??8)+') '
+      +'+ Confirmare ('+(recScore?.f3??0)+'/'+(recScore?.maxF3??5)+'). '
+      +'Contextul macro rămâne bearish — confirmă cu închidere săptămânală deasupra EMA200.';
   } else if(contextBear && triggerBull && !triggerBear) {
     alertColor = '#a78bfa';
     alertTitle = '↗ COUNTER-TREND BOUNCE — Relief rally în bear market';
@@ -3518,6 +3623,543 @@ function renderCGHeatmap(elId, data, currentPrice) {
   }).join('');
 }
 
+
+// ── Volume Profile POC ──────────────────────────────────────
+function calcVolumeProfilePOC(candles,lookback=30,buckets=40){
+  if(!candles||candles.length<lookback)return null;
+  const last=candles.slice(-lookback);
+  const mn=Math.min(...last.map(c=>c.low)),mx=Math.max(...last.map(c=>c.high));
+  const range=mx-mn;if(range===0)return null;
+  const bSize=range/buckets,profile=new Array(buckets).fill(0);
+  last.forEach(cd=>{
+    const bi=Math.min(buckets-1,Math.floor(((cd.high+cd.low)/2-mn)/bSize));
+    profile[bi]+=cd.vol;
+  });
+  let maxVol=0,pocBucket=0;
+  profile.forEach((v,i)=>{if(v>maxVol){maxVol=v;pocBucket=i;}});
+  const pocPrice=mn+(pocBucket+0.5)*bSize;
+  const curPrice=last[last.length-1].close;
+  const distPct=(curPrice-pocPrice)/pocPrice*100;
+  return{pocPrice:+pocPrice.toFixed(0),distPct:+distPct.toFixed(1),
+         nearPOC:Math.abs(distPct)<5,abovePOC:curPrice>pocPrice};
+}
+
+// ── Trendline Breakout Analysis ──────────────────────────────
+function analyzeTrendlineBreakout(tlData){
+  if(!tlData)return{bullBreak:false,bearBreak:false,details:[],tests:[]};
+  const tls=[
+    {tl:tlData.tl1D_desc,tf:'1D',type:'desc'},{tl:tlData.tl1W_desc,tf:'1W',type:'desc'},
+    {tl:tlData.tl4H_desc,tf:'4H',type:'desc'},{tl:tlData.tl1D_asc, tf:'1D',type:'asc'},
+    {tl:tlData.tl1W_asc, tf:'1W',type:'asc'}, {tl:tlData.tl4H_asc, tf:'4H',type:'asc'},
+  ];
+  const bullBreaks=tls.filter(x=>x.tl?.isBreak&&x.type==='desc');
+  const bearBreaks=tls.filter(x=>x.tl?.isBreak&&x.type==='asc');
+  const tests=tls.filter(x=>x.tl?.isTest);
+  return{
+    bullBreak:bullBreaks.length>0,bearBreak:bearBreaks.length>0,
+    bullBreaks,bearBreaks,tests,
+    details:[
+      ...bullBreaks.map(x=>`BREAK BULLISH ${x.tf} (trendline descendent rupt în sus)`),
+      ...bearBreaks.map(x=>`BREAK BEARISH ${x.tf} (trendline ascendent rupt în jos)`),
+      ...tests.map(x=>`TEST ${x.tf} ${x.type==='desc'?'descendent':'ascendent'} în curs`),
+    ]
+  };
+}
+
+// ════════════════════════════════════════════════════════════
+// RECOVERY DETECTION MODULE — Display Only
+// Nu modifică confMacro, confMicro, fuelBear, alertState
+// ════════════════════════════════════════════════════════════
+
+// ── Bollinger Bands ──────────────────────────────────────────
+function calcBollingerBands(closes, period=20, mult=2) {
+  if(!closes || closes.length < period) return null;
+  const last = closes.slice(-period);
+  const ma   = last.reduce((a,b)=>a+b,0) / period;
+  const std  = Math.sqrt(last.reduce((s,v)=>s+(v-ma)**2,0)/period);
+  const upper = ma + mult*std;
+  const lower = ma - mult*std;
+  const price = closes[closes.length-1];
+  const pos   = price < lower ? 'BELOW' : price > upper ? 'ABOVE' : 'INSIDE';
+  const bw    = (upper-lower)/ma*100; // bandwidth %
+  return { ma, upper, lower, price, pos, bw };
+}
+
+// ── RSI Divergence 1D ────────────────────────────────────────
+function calcRSIDivergence1D(candles, rsiArr) {
+  if(!candles || !rsiArr || candles.length < 14 || rsiArr.length < 14) return 'NICIO';
+  const n = Math.min(candles.length, rsiArr.length);
+  const prices = candles.slice(-n).map(c=>c.low);
+  const rsArr  = rsiArr.slice(-n);
+  // Compare last 2 lows vs RSI lows over last 14 candles
+  const chunk = 14;
+  const prevPrices = prices.slice(-chunk*2, -chunk);
+  const lastPrices = prices.slice(-chunk);
+  const prevRSI    = rsArr.slice(-chunk*2, -chunk);
+  const lastRSI    = rsArr.slice(-chunk);
+  if(!prevPrices.length || !lastPrices.length) return 'NICIO';
+  const prevMinP = Math.min(...prevPrices);
+  const lastMinP = Math.min(...lastPrices);
+  const prevMinR = Math.min(...prevRSI);
+  const lastMinR = Math.min(...lastRSI);
+  if(lastMinP < prevMinP && lastMinR > prevMinR) return 'BULLISH';
+  if(lastMinP > prevMinP && lastMinR < prevMinR) return 'BEARISH';
+  return 'NICIO';
+}
+
+// ── Consecutive Closes ───────────────────────────────────────
+function calcClosesStructure(candles, n=3) {
+  if(!candles || candles.length < n+1) return { dir:'INSUF', count:0, pct:0 };
+  const last = candles.slice(-(n+1));
+  let upCount=0, downCount=0;
+  for(let i=1; i<last.length; i++) {
+    if(last[i].close > last[i-1].close) upCount++;
+    else if(last[i].close < last[i-1].close) downCount++;
+  }
+  const pct = ((last[last.length-1].close - last[0].close)/last[0].close*100);
+  if(upCount === n)   return { dir:'UP',   count:upCount,   pct };
+  if(downCount === n) return { dir:'DOWN', count:downCount, pct };
+  return { dir:'MIXT', count:0, pct };
+}
+
+// ── Higher Lows ──────────────────────────────────────────────
+function calcHigherLows(candles, n=3) {
+  if(!candles || candles.length < n+2) return { detected:false, count:0 };
+  const lows = candles.slice(-(n+1)).map(c=>c.low);
+  let hlCount = 0;
+  for(let i=1; i<lows.length; i++) {
+    if(lows[i] > lows[i-1]) hlCount++;
+  }
+  return { detected: hlCount >= n, count: hlCount, total: n };
+}
+
+// ── Funding Cumulativ ────────────────────────────────────────
+function calcFundingCumulative(fundHist, days=5) {
+  if(!fundHist || !fundHist.length) return { sum:0, negCount:0, signal:'INSUF' };
+  // 3 payments/day × 8h = days*3 entries
+  const limit = days * 3;
+  const last = fundHist.slice(-limit);
+  const sum  = last.reduce((a,x)=>a+x.rate, 0);
+  const negCount = last.filter(x=>x.rate<0).length;
+  let signal = 'NEUTRU';
+  if(sum < -0.3 && negCount >= limit*0.6) signal = 'SHORT_EXPENSIVE'; // bullish
+  else if(sum > 0.3 && negCount <= limit*0.2) signal = 'LONG_EXPENSIVE';  // bearish
+  return { sum:+sum.toFixed(3), negCount, total:last.length, signal };
+}
+
+// ── Delta Volume Cumulativ ───────────────────────────────────
+function calcDeltaVolume(takerHist) {
+  if(!takerHist || takerHist.length < 3) return { delta:0, trend:'INSUF', buyPct:0 };
+  const totalBuy  = takerHist.reduce((a,x)=>a+x.buyVol, 0);
+  const totalSell = takerHist.reduce((a,x)=>a+x.sellVol, 0);
+  const total = totalBuy + totalSell;
+  const delta = totalBuy - totalSell;
+  const buyPct = total > 0 ? (totalBuy/total*100) : 50;
+  // Trend: are buy/sell ratio improving?
+  const recent = takerHist.slice(-4);
+  const older  = takerHist.slice(-8,-4);
+  const recentRatio = recent.reduce((a,x)=>a+x.ratio,0)/recent.length;
+  const olderRatio  = older.length ? older.reduce((a,x)=>a+x.ratio,0)/older.length : recentRatio;
+  const trend = recentRatio > olderRatio*1.05 ? 'IMPROVING'
+              : recentRatio < olderRatio*0.95 ? 'DETERIORATING'
+              : 'STABLE';
+  return { delta:+delta.toFixed(0), trend, buyPct:+buyPct.toFixed(1), recentRatio:+recentRatio.toFixed(3) };
+}
+
+// ── Card helper ──────────────────────────────────────────────
+function recCard(id, title, value, sub, color, score) {
+  const el = $(id);
+  if(!el) return;
+  const dot = score===1 ? '🟢' : score===0 ? '🔴' : '⚪';
+  el.innerHTML = `
+    <div style="font-size:.52rem;color:#4a6080;margin-bottom:3px">${dot} ${title}</div>
+    <div style="font-size:.72rem;font-weight:700;color:${color};margin-bottom:2px">${value}</div>
+    <div style="font-size:.6rem;color:#4a6080;line-height:1.5">${sub}</div>`;
+}
+
+// ── MAIN RENDER ──────────────────────────────────────────────
+
+// ── RECOVERY SCORE CALCULATOR (pentru integrare în alertă) ──
+function calcRecoveryScore(d, emaB, macdB, rsiB4h, rsiB1d, ethRelative, ichiB, tlData) {
+  let f1=0, f2=0, f3=0;
+
+  // ── FAZA 1 ───────────────────────────────────────────────
+  // RSI 1D oversold
+  const rsiD1d = rsiB1d?.rsi ?? 50;
+  if(rsiD1d < 30) f1++;
+
+  // Fear & Greed
+  const fgVal = d.fg ?? 50;
+  if(fgVal < 25) f1++;
+
+  // Funding negativ
+  if((d.btcFunding ?? 0) < -0.01) f1++;
+
+  // StochRSI cross din oversold
+  const stochD = calcStochRSI(d.btcD||[], 14, 14);
+  const stochK = stochD?.k ?? null, stochKPrev = stochD?.kPrev ?? null;
+  if(stochK !== null && stochKPrev !== null &&
+     (( stochKPrev < 20 && stochK > stochKPrev) || stochK < 20)) f1++;
+
+  // Divergență RSI bullish 1D
+  const rsiArr1D = rsiB1d?.arr ?? [];
+  if(calcRSIDivergence1D(d.btcD, rsiArr1D) === 'BULLISH') f1++;
+
+  // Funding cumulativ 5D
+  const fundCum = calcFundingCumulative(d.btcFundHist, 5);
+  if(fundCum.signal === 'SHORT_EXPENSIVE') f1++;
+
+  // Bollinger Bands
+  const closes1D = d.btcD ? d.btcD.map(x=>x.close) : [];
+  const bb = calcBollingerBands(closes1D, 20, 2);
+  if(bb && (bb.pos === 'BELOW' ||
+    (bb.pos === 'INSIDE' && closes1D.length > 1 &&
+     closes1D[closes1D.length-2] < bb.lower))) f1++;
+
+  // ── FAZA 2 ───────────────────────────────────────────────
+  // Closes 1D consecutive
+  if(calcClosesStructure(d.btcD||[], 2).dir === 'UP') f2++;
+
+  // Closes 4H consecutive
+  if(calcClosesStructure(d.btc4H||[], 3).dir === 'UP') f2++;
+
+  // Higher Lows 4H
+  if(calcHigherLows(d.btc4H||[], 3).detected) f2++;
+
+  // Higher Lows 1D
+  if(calcHigherLows(d.btcD||[], 2).detected) f2++;
+
+  // Delta Volume
+  const dv = calcDeltaVolume(d.btcTakerHist||[]);
+  if(dv.trend === 'IMPROVING' && dv.buyPct > 52) f2++;
+
+  // Volume Profile POC
+  const poc = calcVolumeProfilePOC(d.btcD||[], 30, 40);
+  if(poc && poc.abovePOC && poc.nearPOC) f2++;
+
+  // Long/Short ratio
+  if((d.btcLS ?? 1) < 0.8) f2++;
+
+  // OI stabilizat
+  const oiNow = d.btcOI ?? 0, oiPrev = d.btcOIPrev ?? oiNow;
+  const oiChgPct = oiPrev > 0 ? (oiNow-oiPrev)/oiPrev*100 : 0;
+  if(Math.abs(oiChgPct) < 2 || oiChgPct < -3) f2++;
+
+  // ── FAZA 3 ───────────────────────────────────────────────
+  // MACD 4H bullish cross
+  if(macdB?.bullish && macdB?.crossup) f3++;
+
+  // EMA Stack bullish 4H
+  if(emaB?.stackBull) f3++;
+
+  // ETH Relative STRENGTH
+  if(ethRelative?.state === 'STRENGTH') f3++;
+
+  // Ichimoku TK cross
+  if(ichiB?.tkBull) f3++;
+
+  // Trendline breakout bullish
+  const tlBreak = analyzeTrendlineBreakout(tlData);
+  if(tlBreak.bullBreak) f3++;
+
+  return { f1, f2, f3,
+           total: f1+f2+f3,
+           maxF1: 7, maxF2: 8, maxF3: 5 };
+}
+
+function renderRecoveryModule(d, confMacro, confMicro, emaB, macdB, rsiB4h, rsiB1d, ethRelative, ichiB, tlData, preScore) {
+  show('sec-recovery');
+
+  const C = (s,b) => b ? 'var(--safe)' : s ? 'var(--danger)' : 'var(--neutral)';
+  // Use pre-computed score if available (avoids double calculation)
+  let f1 = preScore?.f1 ?? 0;
+  let f2 = preScore?.f2 ?? 0;
+  let f3 = preScore?.f3 ?? 0;
+  const _usePreScore = !!preScore;
+
+  // ── DISCLAIMER dinamic din confMacro ─────────────────────
+  const disclaimer = $('rec-disclaimer');
+  if(disclaimer) {
+    const dir = confMacro?.dir ?? 'neutral';
+    const isBear = dir === 'bear' || dir === 'partial_bear';
+    if(isBear) {
+      disclaimer.style.display = 'block';
+      disclaimer.innerHTML = `⚠ <strong>Contextul macro rămâne BEARISH</strong> (${confMacro?.sig ?? '--'}).
+        Indicatorii de recovery de mai jos sunt <strong>observaționali</strong> — nu schimbă semnalul principal.
+        Recovery structural necesită confirmare macro: Ichimoku 1W bullish + EMA200 recuperat.`;
+    } else {
+      disclaimer.style.display = 'none';
+    }
+  }
+
+  // ── FAZA 1 — CAPITULARE ──────────────────────────────────
+
+  // RSI 1D oversold
+  const rsiD1d = rsiB1d?.rsi ?? 50;
+  const rsiOversold = rsiD1d < 30;
+  const rsiLow      = rsiD1d < 40;
+  if(rsiOversold) f1++;
+  recCard('rec-rsi-oversold', 'RSI 1D',
+    rsiD1d.toFixed(1),
+    rsiOversold ? '< 30 — oversold extrem, capitulare posibilă' :
+    rsiLow      ? '< 40 — territory scăzut, atenție' :
+                  'RSI neutru sau ridicat',
+    C(rsiD1d>60, rsiOversold), rsiOversold?1:0);
+
+  // Fear & Greed
+  const fgVal   = d.fg ?? 50;
+  const fgExtreme = fgVal < 15;
+  const fgFear    = fgVal < 25;
+  if(fgExtreme) f1++;
+  recCard('rec-fg', 'Fear & Greed',
+    `${fgVal} — ${d.fgLabel ?? '--'}`,
+    fgExtreme ? '< 15 — frică extremă, capitulare de sentiment' :
+    fgFear    ? '< 25 — frică, pesimism generalizat' :
+    fgVal > 75 ? '> 75 — lăcomie extremă, risc top' :
+                 'Sentiment neutru',
+    C(fgVal>75, fgExtreme||fgFear), (fgExtreme||fgFear)?1:0);
+
+  // Funding negativ simplu
+  const fundNow    = d.btcFunding ?? 0;
+  const fundNeg    = fundNow < -0.01;
+  const fundExtrNeg= fundNow < -0.03;
+  if(fundNeg) f1++;
+  recCard('rec-funding-neg', 'Funding Rate BTC',
+    `${fundNow>=0?'+':''}${fundNow.toFixed(3)}%`,
+    fundExtrNeg ? 'Funding extrem negativ — short-uri dominante, squeeze posibil' :
+    fundNeg     ? 'Funding negativ — piața plătește short-urile, semnal bullish' :
+    fundNow > 0.05 ? 'Funding pozitiv ridicat — long-uri supraîncălzite' :
+                     'Funding neutru',
+    C(fundNow>0.05, fundNeg), fundNeg?1:0);
+
+  // RSI Divergence 1D — rsiB1d.arr calculat anterior
+  const rsiArr1D = rsiB1d?.arr ?? [];
+  const rsiDiv1D = calcRSIDivergence1D(d.btcD, rsiArr1D);
+  const divBull  = rsiDiv1D === 'BULLISH';
+  const divScore = divBull ? 1 : rsiDiv1D === 'BEARISH' ? 0 : -1;
+  if(divBull) f1++;
+  recCard('rec-rsi-div', 'Divergență RSI 1D',
+    rsiDiv1D === 'BULLISH' ? '↗ BULLISH' : rsiDiv1D === 'BEARISH' ? '↘ BEARISH' : '— NICIO',
+    rsiDiv1D === 'BULLISH' ? 'Preț low nou dar RSI nu confirmă → semnal precoce' :
+    rsiDiv1D === 'BEARISH' ? 'Preț high nou dar RSI scade → pericol' : 'Fără divergență detectată',
+    C(rsiDiv1D==='BEARISH', divBull), divBull?1:0);
+
+  // StochRSI 1D — cross din oversold
+  const stochD=calcStochRSI(d.btcD||[],14,14);
+  const stochK=stochD?.k??null,stochKPrev=stochD?.kPrev??null;
+  const stochCross=stochK!==null&&stochKPrev!==null&&stochKPrev<20&&stochK>stochKPrev;
+  const stochOversold=stochK!==null&&stochK<20;
+  const stochBull=stochCross||stochOversold;
+  if(stochBull)f1++;
+  recCard('rec-stoch','StochRSI 1D',
+    stochK!==null?stochK.toFixed(1):'--',
+    stochCross?`Cross din oversold (prev:${stochKPrev?.toFixed(1)}) — semnal bullish precoce`:
+    stochOversold?'< 20 — momentum epuizat, cross posibil':
+    stochK>80?'> 80 — supracumpărat':
+    `Zona neutră (prev:${stochKPrev?.toFixed(1)})`,
+    C(stochK>80,stochBull),stochBull?1:0);
+
+  // Funding cumulativ 5D
+  const fundCum = calcFundingCumulative(d.btcFundHist, 5);
+  const fundBull = fundCum.signal === 'SHORT_EXPENSIVE';
+  if(fundBull) f1++;
+  recCard('rec-fund-cum', 'Funding Cumulativ 5D',
+    `${fundCum.sum >= 0?'+':''}${fundCum.sum}%`,
+    fundBull ? `Short-urile devin prea scumpe (${fundCum.negCount}/${fundCum.total} plăți negative)` :
+    fundCum.signal === 'LONG_EXPENSIVE' ? `Long-urile prea scumpe (${fundCum.negCount}/${fundCum.total} neg)` :
+    `Neutru (${fundCum.negCount}/${fundCum.total} plăți negative)`,
+    C(fundCum.signal==='LONG_EXPENSIVE', fundBull), fundBull?1:0);
+
+  // Bollinger Bands
+  const closes1D = d.btcD ? d.btcD.map(x=>x.close) : [];
+  const bb = calcBollingerBands(closes1D, 20, 2);
+  const bbBull = bb && bb.pos === 'BELOW'; // preț sub banda inferioară = oversold
+  const bbReentry = bb && bb.pos === 'INSIDE' && closes1D.length > 1 &&
+                    closes1D[closes1D.length-2] < bb.lower; // reintrat în bandă = semnal
+  if(bbBull || bbReentry) f1++;
+  recCard('rec-bb', 'Bollinger Bands 1D (20)',
+    bb ? `${bb.pos === 'BELOW' ? '↓ SUB BANDA INF' : bb.pos === 'ABOVE' ? '↑ DEASUPRA' : '◈ INTERIOR'}` : '--',
+    bb ? `Inf: ${fmt(bb.lower)} · MA: ${fmt(bb.ma)} · Sup: ${fmt(bb.upper)}${bbReentry?' ← reintrare în bandă!':''}` : 'Date insuficiente',
+    C(bb?.pos==='ABOVE', bbBull||bbReentry), (bbBull||bbReentry)?1:0);
+
+  // ── FAZA 2 — ACUMULARE ───────────────────────────────────
+
+  // Closes consecutive 1D (2+ consecutive)
+  const cls1D = calcClosesStructure(d.btcD || [], 2);
+  const cls1DBull = cls1D.dir === 'UP';
+  if(cls1DBull) f2++;
+  recCard('rec-closes-1d', 'Structura Closes 1D',
+    cls1D.dir === 'UP' ? `↑ ${cls1D.count} VERZI` : cls1D.dir === 'DOWN' ? `↓ ${cls1D.count} ROȘII` : '⟷ MIXT',
+    `${cls1D.count > 0 ? cls1D.count+' closes consecutive ' : 'Fără direcție clară '}(${cls1D.pct>=0?'+':''}${cls1D.pct.toFixed(1)}% net)`,
+    C(cls1D.dir==='DOWN', cls1DBull), cls1DBull?1:0);
+
+  // Closes consecutive 4H (3+ consecutive)
+  const cls4H = calcClosesStructure(d.btc4H || [], 3);
+  const cls4HBull = cls4H.dir === 'UP';
+  if(cls4HBull) f2++;
+  recCard('rec-closes-4h', 'Structura Closes 4H',
+    cls4H.dir === 'UP' ? `↑ ${cls4H.count} VERZI` : cls4H.dir === 'DOWN' ? `↓ ${cls4H.count} ROȘII` : '⟷ MIXT',
+    `${cls4H.count > 0 ? cls4H.count+' closes consecutive ' : 'Fără direcție clară '}(${cls4H.pct>=0?'+':''}${cls4H.pct.toFixed(1)}% net)`,
+    C(cls4H.dir==='DOWN', cls4HBull), cls4HBull?1:0);
+
+  // Higher Lows 4H (3 HL)
+  const hl4H = calcHigherLows(d.btc4H || [], 3);
+  if(hl4H.detected) f2++;
+  recCard('rec-hl-4h', 'Higher Lows 4H',
+    hl4H.detected ? '✅ CONFIRMAT' : `${hl4H.count}/${hl4H.total} HL`,
+    hl4H.detected ? '3 Higher Lows consecutivi — vânzătorii cedează' : 'Structura HL nu e completă',
+    C(false, hl4H.detected), hl4H.detected?1:0);
+
+  // Higher Lows 1D (2 HL)
+  const hl1D = calcHigherLows(d.btcD || [], 2);
+  if(hl1D.detected) f2++;
+  recCard('rec-hl-1d', 'Higher Lows 1D',
+    hl1D.detected ? '✅ CONFIRMAT' : `${hl1D.count}/${hl1D.total} HL`,
+    hl1D.detected ? '2 Higher Lows pe 1D — trend bullish macro în formare' : 'Fără Higher Low pe 1D',
+    C(false, hl1D.detected), hl1D.detected?1:0);
+
+  // Delta Volume cumulativ
+  const dv = calcDeltaVolume(d.btcTakerHist || []);
+  const dvBull = dv.trend === 'IMPROVING' && dv.buyPct > 52;
+  if(dvBull) f2++;
+  recCard('rec-delta-vol', 'Delta Volume 48H',
+    dv.trend === 'INSUF' ? '--' : `Buy ${dv.buyPct}%`,
+    dv.trend === 'IMPROVING' ? `Cumpărătorii preiau controlul (ratio: ${dv.recentRatio})` :
+    dv.trend === 'DETERIORATING' ? `Vânzătorii domină (ratio: ${dv.recentRatio})` :
+    `Echilibrat (ratio: ${dv.recentRatio})`,
+    C(dv.trend==='DETERIORATING', dvBull), dvBull?1:0);
+
+  // Volume Profile POC
+  const poc=calcVolumeProfilePOC(d.btcD||[],30,40);
+  const pocBull=poc&&poc.abovePOC&&poc.nearPOC;
+  const pocBear=poc&&!poc.abovePOC&&poc.nearPOC;
+  if(pocBull)f2++;
+  recCard('rec-vol-poc','Volume Profile POC (30D)',
+    poc?fmt(poc.pocPrice):'--',
+    poc?`${poc.abovePOC?'↑ Deasupra POC':'↓ Sub POC'} (dist:${poc.distPct>=0?'+':''}${poc.distPct}%)${poc.nearPOC?' ← nivel semnificativ':''}`:
+    'Date insuficiente',
+    C(pocBear,pocBull),pocBull?1:0);
+
+  // Long/Short Ratio
+  const lsRatio  = d.btcLS ?? 1;
+  const lsExtreme = lsRatio < 0.8; // mult mai mulți shorteri = bullish contrarian
+  const lsHigh    = lsRatio > 1.3; // prea mulți longi = risc squeeze bearish
+  if(lsExtreme) f2++;
+  recCard('rec-ls', 'Long/Short Ratio',
+    lsRatio.toFixed(3),
+    lsExtreme ? `< 0.8 — shorteri dominanți (${lsRatio.toFixed(2)}x), short squeeze posibil` :
+    lsHigh    ? `> 1.3 — longi dominanți (${lsRatio.toFixed(2)}x), risc long squeeze` :
+                `Echilibrat (${lsRatio.toFixed(2)}x)`,
+    C(lsHigh, lsExtreme), lsExtreme?1:0);
+
+  // OI Stabilizat
+  const oiNow  = d.btcOI     ?? 0;
+  const oiPrev = d.btcOIPrev ?? oiNow;
+  const oiChgPct = oiPrev > 0 ? (oiNow - oiPrev) / oiPrev * 100 : 0;
+  const oiStable  = Math.abs(oiChgPct) < 2;   // OI stabil = acumulare liniștită
+  const oiFalling = oiChgPct < -3;             // OI scade = dezleverage / capitulare
+  if(oiStable || oiFalling) f2++;
+  recCard('rec-oi-stab', 'OI Change (4H)',
+    `${oiChgPct>=0?'+':''}${oiChgPct.toFixed(2)}%`,
+    oiStable  ? 'OI stabil — acumulare fără leverage nou, sănătos' :
+    oiFalling ? 'OI în scădere — dezleverage / lichidări forțate' :
+    oiChgPct > 3 ? 'OI crește rapid — leverage nou, risc volatilitate' :
+                   `OI: $${(oiNow/1e9).toFixed(2)}B`,
+    C(oiChgPct>3, oiStable||oiFalling), (oiStable||oiFalling)?1:0);
+
+  // ── FAZA 3 — CONFIRMARE (din indicatori existenți) ───────
+
+  // MACD 4H bullish
+  const macdBull = macdB?.bullish && macdB?.crossup;
+  if(macdBull) f3++;
+  recCard('rec-macd', 'MACD 4H',
+    macdB ? (macdBull ? '↑ BULLISH CROSS' : macdB.bullish ? '↑ BULLISH' : '↓ BEARISH') : '--',
+    macdBull ? 'Cross bullish confirmat pe 4H' : macdB?.bullish ? 'MACD deasupra Signal' : 'MACD sub Signal Line',
+    C(!macdB?.bullish, macdBull), macdBull?1:0);
+
+  // EMA Stack 4H
+  const emaStackBull = emaB?.stackBull;
+  if(emaStackBull) f3++;
+  recCard('rec-ema-stack', 'EMA Stack 4H',
+    emaStackBull ? '✅ BULLISH' : emaB?.stackBear ? '❌ BEARISH' : '◈ MIXT',
+    emaStackBull ? 'EMA9 > EMA21 > EMA50 — momentum bullish complet' :
+    emaB?.stackBear ? 'EMA9 < EMA21 < EMA50 — presiune bearish' : 'EMA-urile nu sunt aliniate',
+    C(emaB?.stackBear, emaStackBull), emaStackBull?1:0);
+
+  // ETH Relative
+  const ethBull = ethRelative?.state === 'STRENGTH';
+  const ethWeak = ethRelative?.state === 'WEAKNESS';
+  if(ethBull) f3++;
+  recCard('rec-eth-rel', 'ETH Relative',
+    ethRelative?.state ?? '--',
+    ethBull ? 'ETH outperformează BTC — risc-on activ' :
+    ethWeak ? 'ETH subperformează — risc-off, atenție' : 'ETH neutru față de BTC',
+    C(ethWeak, ethBull), ethBull?1:0);
+
+  // Ichimoku TK cross
+  const tkBull = ichiB?.tkBull;
+  if(tkBull) f3++;
+  recCard('rec-ichimoku', 'Ichimoku TK 1W',
+    tkBull ? '↑ TENKAN > KIJUN' : '↓ TENKAN < KIJUN',
+    tkBull ? 'Tenkan deasupra Kijun — momentum bullish Ichimoku' : 'Tenkan sub Kijun — bias bearish',
+    C(!tkBull, tkBull), tkBull?1:0);
+
+  // Trendline Breakout
+  const tlBreak = analyzeTrendlineBreakout(tlData);
+  const tlBullScore = tlBreak.bullBreak ? 1 : 0;
+  if(tlBreak.bullBreak) f3++;
+  recCard('rec-trendline-break', 'Trendline Breakout',
+    tlBreak.bullBreak ? '✅ BREAK BULLISH' :
+    tlBreak.bearBreak ? '❌ BREAK BEARISH' :
+    tlBreak.tests.length > 0 ? '⚡ TEST ACTIV' : '◈ FĂRĂ BREAK',
+    tlBreak.details.length > 0
+      ? tlBreak.details[0]
+      : 'Prețul nu a rupt nicio trendline activă',
+    C(tlBreak.bearBreak, tlBreak.bullBreak), tlBullScore);
+
+  // ── SCOR FINAL ───────────────────────────────────────────
+  const maxF1=7, maxF2=8, maxF3=5;
+  const total = f1+f2+f3, maxTotal = maxF1+maxF2+maxF3;
+
+  const f1C = f1>=3?'var(--safe)':f1>=2?'var(--warn)':'var(--danger)';
+  const f2C = f2>=4?'var(--safe)':f2>=2?'var(--warn)':'var(--danger)';
+  const f3C = f3>=3?'var(--safe)':f3>=2?'var(--warn)':'var(--danger)';
+
+  $('rec-score-f1').textContent = `${f1}/${maxF1}`;
+  $('rec-score-f1').style.color = f1C;
+  $('rec-score-f2').textContent = `${f2}/${maxF2}`;
+  $('rec-score-f2').style.color = f2C;
+  $('rec-score-f3').textContent = `${f3}/${maxF3}`;
+  $('rec-score-f3').style.color = f3C;
+
+  let verdict, verdictColor, verdictDetail;
+  if(f1>=5 && f2>=6 && f3>=4) {
+    verdict = '✅ RECOVERY STRUCTURAL CONFIRMAT — STRONG';
+    verdictColor = 'var(--safe)';
+    verdictDetail = 'Scor maxim. Toți indicatorii aliniați bullish.';
+  } else if(f1>=4 && f2>=5 && f3>=3) {
+    verdict = '✅ RECOVERY STRUCTURAL CONFIRMAT';
+    verdictColor = 'var(--safe)';
+    verdictDetail = 'Toate 3 fazele confirmate. Structura de preț, momentum și contextul macro sunt aliniate bullish.';
+  } else if(f2>=4 && f3>=2) {
+    verdict = '↗ RECOVERY ÎN FORMARE';
+    verdictColor = 'var(--warn)';
+    verdictDetail = `Acumularea progresează (${f2}/${maxF2}). Lipsesc confirmări macro complete. Urmărește zilnic.`;
+  } else if(f1>=2) {  // early signs
+    verdict = '⚡ POSIBIL BOTTOM — Acumulare neconfirmată';
+    verdictColor = '#a78bfa';
+    verdictDetail = `Semnale de capitulare (${f1}/${maxF1}) dar fără structura de acumulare. Prea devreme pentru intrare.`;
+  } else {
+    verdict = '◈ FĂRĂ SEMNAL DE RECOVERY';
+    verdictColor = '#4a6080';
+    verdictDetail = `Scor total: ${total}/${maxTotal}. Structura bearish intactă.`;
+  }
+
+  $('rec-verdict').textContent = verdict;
+  $('rec-verdict').style.color = verdictColor;
+  $('rec-verdict-detail').textContent = verdictDetail;
+}
+
 let _journalLastData = null; // stores last refresh data for snapshots
 
 // ── RE-ENTRY BOUNCE SECTION UPDATE ─────────────────────────────────
@@ -4150,7 +4792,10 @@ async function refresh() {
       target2:   _kijun1w  ? Math.round(_kijun1w)   : 0,
     };
 
-    updateAlertBanner(d,emaB,macdB,rsiB4h,ema200BTC,ethRelative,confMacro,confMicro,null,rsiB1d,_reentryBounce,_reentryData);
+    // ── RECOVERY SCORE — calculat înainte de alertă ──
+    const _recScore = calcRecoveryScore(d,emaB,macdB,rsiB4h,rsiB1d,ethRelative,ichiRawB,tlDataBTC);
+    updateAlertBanner(d,emaB,macdB,rsiB4h,ema200BTC,ethRelative,confMacro,confMicro,null,rsiB1d,_reentryBounce,_reentryData,_recScore);
+    renderRecoveryModule(d,confMacro,confMicro,emaB,macdB,rsiB4h,rsiB1d,ethRelative,ichiRawB,tlDataBTC,_recScore);
     updateReentrySection(_reentryBounce, _reentryData, d.btcPrice);
 
     // ── CROSS-TF ──
