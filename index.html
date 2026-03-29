@@ -2135,7 +2135,7 @@ function buildActionMap(coin, price, riskScore, rsiDaily, rsiWeekly, ema200Dist,
 // ═══════════════════════════════════════════════════════
 // ALERT BANNER — Short-term bearish signal detector
 // ═══════════════════════════════════════════════════════
-function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confMacro, confMicro, trendlineData) {
+function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confMacro, confMicro, trendlineData, rsiB1d) {
   const banner = $('alert-banner');
   if(!banner) return;
 
@@ -2188,8 +2188,8 @@ function updateAlertBanner(d, emaB, macdB, rsiB4h, ema200BTC, ethRelative, confM
   // Drawdown față de high-ul din ultimele 30 de zile (proxy: EMA200 dist + extra)
   // Aproximăm cu EMA200 dist < -15% ca indicator de drawdown semnificativ
   const drawdownSignificant = ema200DistVal < -15;
-  const rsiD1d      = rsiB1d?.rsi ?? 50;
-  const rsiD1dPrev  = rsiB1d?.prev ?? rsiD1d;
+  const rsiD1d      = rsiB1d?.rsi    ?? 50;
+  const rsiD1dPrev  = rsiB1d?.prev   ?? rsiD1d;
   const rsiRiseStrong       = (rsiD1d - rsiD1dPrev) > 2;
   const rsiComingFromOversold = rsiD1dPrev < 40;
 
@@ -3454,7 +3454,7 @@ async function refresh() {
     show('sec-conf-micro'); show('sec-risk-micro');
 
     // ── ALERT BANNER ──
-    updateAlertBanner(d,emaB,macdB,rsiB4h,ema200BTC,ethRelative,confMacro,confMicro,null);
+    updateAlertBanner(d,emaB,macdB,rsiB4h,ema200BTC,ethRelative,confMacro,confMicro,null,rsiB1d);
 
     // ── CROSS-TF ──
     buildCrossTF(confMacro,confMicro,ichiRawB,trendData,d,rsiB1w,emaB,macdB,rsiB4h);
