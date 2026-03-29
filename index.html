@@ -2955,9 +2955,10 @@ function projectTrendline(closes, p1, p2) {
 }
 
 // ── Build one trendline from array of swing points ─────
-function buildTrendline(closes, points, type) {
+function buildTrendline(closes, points, type, minDist=0) {
   // Try to find 3 valid pivot points with no structural break between them
   // points are sorted most-recent first
+  // minDist: minimum candle distance between p1 and p2 (0 = no filter)
   for(let i=0; i<points.length-1; i++) {
     for(let j=i+1; j<points.length; j++) {
       const p1 = points[j]; // older
@@ -2965,6 +2966,8 @@ function buildTrendline(closes, points, type) {
       // Direction check
       if(type === 'descending' && p1.price <= p2.price) continue;
       if(type === 'ascending'  && p1.price >= p2.price) continue;
+      // Minimum distance filter — ensures structural trendlines only
+      if(minDist > 0 && (p2.idx - p1.idx) < minDist) continue;
       // Validate no break between them
       if(!validateTrendline(closes, p1, p2)) continue;
       // Check if a 3rd point also touches the line (within 1.5%)
@@ -3311,18 +3314,18 @@ function renderTrendlines(coin, closes4H, closesD, closesW, currentPrice, fibMic
   if(!el) return;
 
   // Detect swings per timeframe with appropriate lookback
-  // 1W (lookback=4): pivot over 8 weekly candles = ~2 months
-  // 1D (lookback=8): pivot over 16 daily candles = ~3 weeks
-  // 4H (lookback=5): pivot over 10 4H candles = ~2 days
+  // 1W (lookback=4):  pivot over 8 weekly candles  = ~2 months  (structural)
+  // 1D (lookback=15): pivot over 30 daily candles  = ~1 month   (structural, was 8)
+  // 4H (lookback=5):  pivot over 10 4H candles     = ~2 days    (tactical)
   const sw1W = findAllSwings(closesW, 4);
-  const sw1D = findAllSwings(closesD, 8);
+  const sw1D = findAllSwings(closesD, 15);
   const sw4H = findAllSwings(closes4H, 5);
 
   // Build trendlines per timeframe
   const tl1W_desc = buildTrendline(closesW, sw1W.highs, 'descending');
   const tl1W_asc  = buildTrendline(closesW, sw1W.lows,  'ascending');
-  const tl1D_desc = buildTrendline(closesD, sw1D.highs, 'descending');
-  const tl1D_asc  = buildTrendline(closesD, sw1D.lows,  'ascending');
+  const tl1D_desc = buildTrendline(closesD, sw1D.highs, 'descending', 14);
+  const tl1D_asc  = buildTrendline(closesD, sw1D.lows,  'ascending',  14);
   const tl4H_desc = buildTrendline(closes4H, sw4H.highs, 'descending');
   const tl4H_asc  = buildTrendline(closes4H, sw4H.lows,  'ascending');
 
