@@ -675,13 +675,83 @@ footer{font-family:'Space Mono',monospace;font-size:.54rem;color:var(--neutral);
     </div>
   </div>
 
-  <!-- Liquidation Estimates -->
+  <!-- OI Change + Liquidation Heatmap -->
   <div class="section" id="sec-liq" style="display:none">
-    <div class="sec-header"><div class="sec-bar" style="background:var(--danger)"></div><div class="sec-title">Zone de Lichidare</div><span class="src-tag">Estimat din preț + leverage tipic</span></div>
-    <div class="g2">
-      <div class="card"><div style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--neutral);margin-bottom:10px">₿ BITCOIN</div><div id="liq-btc"></div><div style="margin-top:10px;font-size:.7rem;color:var(--text);line-height:1.6" id="liq-btc-note"></div></div>
-      <div class="card"><div style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--neutral);margin-bottom:10px">Ξ ETHEREUM</div><div id="liq-eth"></div><div style="margin-top:10px;font-size:.7rem;color:var(--text);line-height:1.6" id="liq-eth-note"></div></div>
+
+    <!-- ── OI Change ── -->
+    <div class="sec-header">
+      <div class="sec-bar" style="background:var(--warn)"></div>
+      <div class="sec-title">Open Interest — Evoluție 48H</div>
+      <span class="src-tag" id="oi-src-tag">Binance Futures · ~25% OI global</span>
     </div>
+    <div class="g2" style="margin-bottom:16px">
+      <div class="card">
+        <div style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--neutral);margin-bottom:8px">₿ BTC Open Interest</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:4px" id="oi-btc-val">--</div>
+        <div style="font-size:.7rem;margin-bottom:8px" id="oi-btc-chg">--</div>
+        <canvas id="oi-btc-chart" height="50" style="width:100%;display:block;margin-bottom:6px"></canvas>
+        <div style="font-size:.66rem;color:var(--neutral);line-height:1.7" id="oi-btc-interp">--</div>
+      </div>
+      <div class="card">
+        <div style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--neutral);margin-bottom:8px">Ξ ETH Open Interest</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:4px" id="oi-eth-val">--</div>
+        <div style="font-size:.7rem;margin-bottom:8px" id="oi-eth-chg">--</div>
+        <canvas id="oi-eth-chart" height="50" style="width:100%;display:block;margin-bottom:6px"></canvas>
+        <div style="font-size:.66rem;color:var(--neutral);line-height:1.7" id="oi-eth-interp">--</div>
+      </div>
+    </div>
+
+    <!-- ── Liquidation Heatmap ── -->
+    <div class="sec-header" style="margin-top:8px">
+      <div class="sec-bar" style="background:var(--danger)"></div>
+      <div class="sec-title">Zone de Lichidare</div>
+      <span class="src-tag" id="liq-src-tag">Estimat din leverage tipic</span>
+    </div>
+
+    <!-- CoinGlass API Key input -->
+    <div id="cg-key-panel" style="background:rgba(255,179,0,.06);border:1px solid rgba(255,179,0,.2);border-radius:8px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-family:'Space Mono',monospace;font-size:.6rem;color:var(--warn);margin-bottom:8px;letter-spacing:.08em">🔑 COINGLASS API KEY — date reale de lichidare</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="cg-api-key-input" type="password" placeholder="Introdu CoinGlass API key..."
+          style="flex:1;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-family:'Space Mono',monospace;font-size:.62rem"
+          oninput="cgKeySave(this.value)">
+        <button onclick="cgKeyTest()" style="background:rgba(255,179,0,.12);border:1px solid rgba(255,179,0,.3);color:var(--warn);padding:7px 12px;border-radius:6px;cursor:pointer;font-family:'Space Mono',monospace;font-size:.58rem">Test</button>
+        <button onclick="cgKeyClear()" style="background:rgba(255,51,85,.08);border:1px solid rgba(255,51,85,.2);color:var(--danger);padding:7px 12px;border-radius:6px;cursor:pointer;font-family:'Space Mono',monospace;font-size:.58rem">Șterge</button>
+      </div>
+      <div id="cg-key-status" style="font-size:.58rem;margin-top:6px;color:var(--neutral)">
+        Fără key → lichidările sunt estimate din leverage tipic (nerecomandat). Cu key → date reale CoinGlass agregate de pe 30+ exchange-uri.
+        <a href="https://www.coinglass.com/pricing" target="_blank" style="color:var(--warn);text-decoration:none"> Obține key gratuit →</a>
+      </div>
+    </div>
+
+    <!-- Liq content — estimated or real -->
+    <div class="g2" id="liq-content-panel">
+      <div class="card">
+        <div style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--neutral);margin-bottom:10px">₿ BITCOIN</div>
+        <div id="liq-btc"></div>
+        <div style="margin-top:10px;font-size:.7rem;color:var(--text);line-height:1.6" id="liq-btc-note"></div>
+      </div>
+      <div class="card">
+        <div style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--neutral);margin-bottom:10px">Ξ ETHEREUM</div>
+        <div id="liq-eth"></div>
+        <div style="margin-top:10px;font-size:.7rem;color:var(--text);line-height:1.6" id="liq-eth-note"></div>
+      </div>
+    </div>
+
+    <!-- CoinGlass heatmap panel (shown when key present) -->
+    <div id="cg-heatmap-panel" style="display:none">
+      <div class="g2">
+        <div class="card">
+          <div style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--neutral);margin-bottom:10px">₿ BTC — Lichidări reale (CoinGlass)</div>
+          <div id="cg-liq-btc"></div>
+        </div>
+        <div class="card">
+          <div style="font-family:'Space Mono',monospace;font-size:.56rem;color:var(--neutral);margin-bottom:10px">Ξ ETH — Lichidări reale (CoinGlass)</div>
+          <div id="cg-liq-eth"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Verdict Micro -->
@@ -2609,8 +2679,11 @@ function fibConfluence(fibMicro, fibMedium, fibMacro, rsiD, rsiW, ichiAbove) {
     if(cnt >= 2) {
       const isSupport = ['0.618','0.786'].includes(lvl);
       const isResist  = ['0.236','0.382','0.500'].includes(lvl);
-      if(isSupport) bullish.push(`Nivel ${lvl} apare pe ${cnt}/3 TF-uri — suport multi-timeframe`);
-      if(isResist)  bearish.push(`Nivel ${lvl} apare pe ${cnt}/3 TF-uri — rezistență multi-timeframe`);
+      // Get price from first fib that has this level in zone
+      const fibWithLvl = fibs.find(f => f.inZone && f.nearest === lvl);
+      const lvlPrice = fibWithLvl ? ` (${fmt(fibWithLvl.nearestPrice)})` : '';
+      if(isSupport) bullish.push(`Nivel ${lvl}${lvlPrice} apare pe ${cnt}/3 TF-uri — suport multi-timeframe`);
+      if(isResist)  bearish.push(`Nivel ${lvl}${lvlPrice} apare pe ${cnt}/3 TF-uri — rezistență multi-timeframe`);
     }
   }
 
@@ -2621,15 +2694,15 @@ function fibConfluence(fibMicro, fibMedium, fibMacro, rsiD, rsiW, ichiAbove) {
     const isRes = ['0.236','0.382'].includes(f.nearest);
 
     if(isSup && rsiD < 40)
-      bullish.push(`${f.label}: preț la suport ${f.nearest} + RSI daily supravândut (${rsiD.toFixed(1)})`);
+      bullish.push(`${f.label}: preț la suport ${f.nearest} (${fmt(f.nearestPrice)}) + RSI daily supravândut (${rsiD.toFixed(1)})`);
     if(isSup && rsiW < 40)
-      bullish.push(`${f.label}: preț la suport ${f.nearest} + RSI weekly scăzut (${rsiW.toFixed(1)})`);
+      bullish.push(`${f.label}: preț la suport ${f.nearest} (${fmt(f.nearestPrice)}) + RSI weekly scăzut (${rsiW.toFixed(1)})`);
     if(isSup && !ichiAbove)
-      bearish.push(`${f.label}: nivel ${f.nearest} este suport DAR prețul e sub norul Ichimoku — suportul poate ceda`);
+      bearish.push(`${f.label}: nivel ${f.nearest} (${fmt(f.nearestPrice)}) este suport DAR prețul e sub norul Ichimoku — suportul poate ceda`);
     if(isRes && rsiD > 60)
-      bearish.push(`${f.label}: preț la rezistență ${f.nearest} + RSI daily ridicat (${rsiD.toFixed(1)})`);
+      bearish.push(`${f.label}: preț la rezistență ${f.nearest} (${fmt(f.nearestPrice)}) + RSI daily ridicat (${rsiD.toFixed(1)})`);
     if(isRes && ichiAbove && rsiD > 55)
-      bullish.push(`${f.label}: preț la ${f.nearest} dar deasupra norului Ichimoku — posibil breakout în sus`);
+      bullish.push(`${f.label}: preț la ${f.nearest} (${fmt(f.nearestPrice)}) dar deasupra norului Ichimoku — posibil breakout în sus`);
   }
 
   // Price below all fib levels = capitulation / oversold zone
@@ -3207,6 +3280,244 @@ function svgLeave(ttId, crossId) {
   if(cross) cross.style.display = 'none';
 }
 
+// ── COINGLASS KEY MANAGEMENT ─────────────────────────────────────
+const CG_KEY_LS = 'cg_api_key_v1';
+function cgKeySave(val) {
+  if(val) localStorage.setItem(CG_KEY_LS, val.trim());
+  else localStorage.removeItem(CG_KEY_LS);
+}
+function cgKeyGet() { return localStorage.getItem(CG_KEY_LS) || ''; }
+function cgKeyClear() {
+  localStorage.removeItem(CG_KEY_LS);
+  const inp = $('cg-api-key-input');
+  if(inp) inp.value = '';
+  $('cg-key-status').textContent = 'Key șters. Lichidările revin la mod estimat.';
+  $('cg-key-status').style.color = 'var(--neutral)';
+  $('cg-heatmap-panel').style.display = 'none';
+  $('liq-content-panel').style.display = '';
+  $('liq-src-tag').textContent = '⚠ Estimat din leverage tipic';
+}
+async function cgKeyTest() {
+  const key = cgKeyGet() || ($('cg-api-key-input')?.value ?? '');
+  if(!key) { $('cg-key-status').textContent = 'Introdu un API key.'; return; }
+  $('cg-key-status').textContent = 'Se verifică...';
+  $('cg-key-status').style.color = 'var(--neutral)';
+  try {
+    const r = await fetch('https://open-api.coinglass.com/public/v2/liqHeatmap?symbol=BTC&timeType=1', {
+      headers: { 'coinglassSecret': key }
+    });
+    if(r.ok) {
+      cgKeySave(key);
+      $('cg-key-status').textContent = '✅ Key valid — date reale active';
+      $('cg-key-status').style.color = 'var(--safe)';
+      $('liq-src-tag').textContent = '✅ CoinGlass — 30+ exchange-uri';
+      refresh(); // reload with real data
+    } else {
+      $('cg-key-status').textContent = '❌ Key invalid (HTTP '+r.status+')';
+      $('cg-key-status').style.color = 'var(--danger)';
+    }
+  } catch(e) {
+    $('cg-key-status').textContent = '⚠ Eroare rețea: ' + e.message;
+    $('cg-key-status').style.color = 'var(--warn)';
+  }
+}
+
+// ── OI CHART (Canvas sparkline) ───────────────────────────────────
+function renderOIChart(canvasId, oiHistory) {
+  const canvas = document.getElementById(canvasId);
+  if(!canvas || !oiHistory || oiHistory.length < 2) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 280;
+  const H = 50;
+  canvas.width = W; canvas.height = H;
+
+  const vals = oiHistory.map(x => x.v);
+  const mn = Math.min(...vals), mx = Math.max(...vals);
+  const range = mx - mn || 1;
+  const sx = i => (i / (vals.length-1)) * W;
+  const sy = v => H - 4 - ((v - mn) / range) * (H - 8);
+
+  // Area fill
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0, 'rgba(255,179,0,0.2)');
+  grad.addColorStop(1, 'rgba(255,179,0,0.01)');
+  ctx.beginPath();
+  ctx.moveTo(sx(0), H);
+  vals.forEach((v,i) => ctx.lineTo(sx(i), sy(v)));
+  ctx.lineTo(sx(vals.length-1), H);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  vals.forEach((v,i) => i===0 ? ctx.moveTo(sx(i),sy(v)) : ctx.lineTo(sx(i),sy(v)));
+  ctx.strokeStyle = 'rgba(255,179,0,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Zero reference line (last value is "now")
+  const lastIdx = vals.length - 1;
+  ctx.beginPath();
+  ctx.moveTo(0, sy(vals[0]));
+  ctx.lineTo(W, sy(vals[0]));
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 0.8;
+  ctx.setLineDash([3,4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// ── OI INTERPRETATION ─────────────────────────────────────────────
+function interpretOI(oiHistory, priceHistory) {
+  if(!oiHistory || oiHistory.length < 4) return 'Date insuficiente.';
+  const oiFirst = oiHistory[0].v, oiLast = oiHistory[oiHistory.length-1].v;
+  const oiChg   = (oiLast - oiFirst) / oiFirst * 100;
+  const prFirst  = priceHistory[0], prLast = priceHistory[priceHistory.length-1];
+  const prChg    = (prLast - prFirst) / prFirst * 100;
+
+  // Classic OI + Price interpretation
+  if(oiChg > 3 && prChg > 1)
+    return '📈 OI ↑ + Preț ↑ — Trend bullish confirmat. Capital nou intră pe long.';
+  if(oiChg > 3 && prChg < -1)
+    return '⚠ OI ↑ + Preț ↓ — Presiune short crescândă. Poziții short noi deschise.';
+  if(oiChg < -3 && prChg > 1)
+    return '↗ OI ↓ + Preț ↑ — Short squeeze posibil. Lichidări short forțate.';
+  if(oiChg < -3 && prChg < -1)
+    return '📉 OI ↓ + Preț ↓ — Long squeeze / dezleverage. Lichidări long forțate.';
+  if(Math.abs(oiChg) < 1.5)
+    return '◈ OI stabil — Piața fără direcție clară. Poziționare echilibrată.';
+  return `◈ OI ${oiChg>=0?'↑ +':'↓ '}${oiChg.toFixed(1)}% în 48H față de start perioadă.`;
+}
+
+// ── RENDER OI SECTION ─────────────────────────────────────────────
+async function renderOISection(d) {
+  // Fetch 48H OI history for BTC and ETH
+  try {
+    const [btcOIHist, ethOIHist] = await Promise.all([
+      fetch('https://fapi.binance.com/futures/data/openInterestHist?symbol=BTCUSDT&period=1h&limit=48').then(r=>r.json()),
+      fetch('https://fapi.binance.com/futures/data/openInterestHist?symbol=ETHUSDT&period=1h&limit=48').then(r=>r.json()),
+    ]);
+
+    const parseOI = arr => arr.map(x => ({ ts: x.timestamp, v: +x.sumOpenInterestValue }));
+    const btcOI = parseOI(btcOIHist);
+    const ethOI = parseOI(ethOIHist);
+
+    if(!btcOI.length || !ethOI.length) return;
+
+    // BTC
+    const btcFirst = btcOI[0].v, btcLast = btcOI[btcOI.length-1].v;
+    const btcChg   = (btcLast - btcFirst) / btcFirst * 100;
+    const btcC     = btcChg > 2 ? 'var(--warn)' : btcChg < -2 ? 'var(--safe)' : 'var(--neutral)';
+    $('oi-btc-val').textContent = '$' + fmtD(btcLast);
+    $('oi-btc-chg').innerHTML =
+      `<span style="color:${btcC};font-weight:700">${btcChg>=0?'+':''}${btcChg.toFixed(2)}% (48H)</span>` +
+      ` <span style="color:var(--neutral);font-size:.58rem">vs acum 48H: $${fmtD(btcFirst)}</span>`;
+
+    // ETH
+    const ethFirst = ethOI[0].v, ethLast = ethOI[ethOI.length-1].v;
+    const ethChg   = (ethLast - ethFirst) / ethFirst * 100;
+    const ethC     = ethChg > 2 ? 'var(--warn)' : ethChg < -2 ? 'var(--safe)' : 'var(--neutral)';
+    $('oi-eth-val').textContent = '$' + fmtD(ethLast);
+    $('oi-eth-chg').innerHTML =
+      `<span style="color:${ethC};font-weight:700">${ethChg>=0?'+':''}${ethChg.toFixed(2)}% (48H)</span>` +
+      ` <span style="color:var(--neutral);font-size:.58rem">vs acum 48H: $${fmtD(ethFirst)}</span>`;
+
+    // Charts
+    renderOIChart('oi-btc-chart', btcOI);
+    renderOIChart('oi-eth-chart', ethOI);
+
+    // Price history proxy (use close from d.btcD last 48 candles ~hourly from 1h)
+    const btcPrices = (d.btc1H || []).slice(-48).map(x => x.close);
+    const ethPrices = (d.eth1H || []).slice(-48).map(x => x.close);
+    $('oi-btc-interp').textContent = interpretOI(btcOI, btcPrices.length ? btcPrices : [btcFirst, btcLast]);
+    $('oi-eth-interp').textContent = interpretOI(ethOI, ethPrices.length ? ethPrices : [ethFirst, ethLast]);
+
+  } catch(e) {
+    console.warn('OI history fetch failed:', e.message);
+  }
+
+  // ── CoinGlass heatmap if key present ──
+  const cgKey = cgKeyGet();
+  if(cgKey) {
+    try {
+      const [btcHM, ethHM] = await Promise.all([
+        fetch('https://open-api.coinglass.com/public/v2/liqHeatmap?symbol=BTC&timeType=1', {
+          headers: { 'coinglassSecret': cgKey }
+        }).then(r=>r.json()),
+        fetch('https://open-api.coinglass.com/public/v2/liqHeatmap?symbol=ETH&timeType=1', {
+          headers: { 'coinglassSecret': cgKey }
+        }).then(r=>r.json()),
+      ]);
+
+      if(btcHM.code === '0' && ethHM.code === '0') {
+        renderCGHeatmap('cg-liq-btc', btcHM.data, d.btcPrice);
+        renderCGHeatmap('cg-liq-eth', ethHM.data, d.ethPrice);
+        $('cg-heatmap-panel').style.display = 'block';
+        $('liq-content-panel').style.display = 'none';
+        $('liq-src-tag').textContent = '✅ CoinGlass — 30+ exchange-uri';
+      }
+    } catch(e) {
+      console.warn('CoinGlass fetch failed:', e.message);
+    }
+  }
+}
+
+// ── RENDER COINGLASS HEATMAP ──────────────────────────────────────
+function renderCGHeatmap(elId, data, currentPrice) {
+  const el = $(elId);
+  if(!el || !data) return;
+
+  // data is object: { price: [[price, level, leverage, null], ...] }
+  const entries = [];
+  if(data.data) {
+    Object.entries(data.data).forEach(([priceStr, rows]) => {
+      if(Array.isArray(rows)) {
+        rows.forEach(row => {
+          if(row && row[1] > 0) {
+            entries.push({ price: +priceStr, level: row[1], lev: row[2] });
+          }
+        });
+      }
+    });
+  }
+
+  if(!entries.length) {
+    el.innerHTML = '<div style="color:var(--neutral);font-size:.62rem;padding:8px">Date insuficiente de la CoinGlass.</div>';
+    return;
+  }
+
+  // Sort by price desc, find top clusters
+  entries.sort((a,b) => b.level - a.level);
+  const top = entries.slice(0, 12);
+  const maxLevel = top[0].level;
+
+  // Split above/below current price
+  const above = top.filter(e => e.price > currentPrice).sort((a,b) => a.price - b.price);
+  const below = top.filter(e => e.price <= currentPrice).sort((a,b) => b.price - a.price);
+  const all   = [...above.reverse(), ...below];
+
+  el.innerHTML = all.map(e => {
+    const isAbove  = e.price > currentPrice;
+    const color    = isAbove ? 'var(--danger)' : 'var(--safe)';
+    const type     = isAbove ? 'SHORT LIQ' : 'LONG LIQ';
+    const dist     = ((Math.abs(e.price - currentPrice) / currentPrice) * 100).toFixed(1);
+    const barW     = Math.round((e.level / maxLevel) * 100);
+    const isCurrent = Math.abs(e.price - currentPrice) / currentPrice < 0.025;
+    return `<div style="margin-bottom:5px${isCurrent?';background:rgba(255,179,0,.06);border-radius:4px;padding:2px 4px':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <span style="color:${color};font-size:.6rem;font-weight:700">${type}</span>
+        <span style="font-size:.66rem;font-weight:700;color:var(--white)">${fmt(e.price)}</span>
+        <span style="font-size:.56rem;color:var(--neutral)">${dist}%</span>
+        ${isCurrent ? '<span style="font-size:.5rem;background:rgba(255,179,0,.15);color:var(--warn);padding:1px 5px;border-radius:2px">← ACUM</span>' : ''}
+      </div>
+      <div style="background:rgba(255,255,255,.05);border-radius:2px;height:3px">
+        <div style="background:${color};width:${barW}%;height:3px;border-radius:2px;opacity:0.7"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 let _journalLastData = null; // stores last refresh data for snapshots
 
 // ── RE-ENTRY BOUNCE SECTION UPDATE ─────────────────────────────────
@@ -3757,6 +4068,7 @@ async function refresh() {
     // ── MICRO: Liq Levels ──
     const liqB=renderLiqLevels('btc',d.btcPrice);
     const liqE=renderLiqLevels('eth',d.ethPrice);
+    renderOISection(d); // async — OI 48H + CoinGlass heatmap
     show('sec-liq');
 
     // ── MICRO: Action Map ──
@@ -3934,6 +4246,17 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+// Initialize — restore CoinGlass key if saved
+(function(){
+  const key = cgKeyGet();
+  const inp = $('cg-api-key-input');
+  if(inp && key) {
+    inp.value = key;
+    $('cg-key-status').textContent = '✅ Key salvat — va fi folosit la refresh.';
+    $('cg-key-status').style.color = 'var(--safe)';
+    $('liq-src-tag').textContent = '✅ CoinGlass — 30+ exchange-uri';
+  }
+})();
 // Initialize
 $('hdate').textContent = new Date().toLocaleDateString('ro-RO', {
   weekday:'long', year:'numeric', month:'long', day:'numeric'
